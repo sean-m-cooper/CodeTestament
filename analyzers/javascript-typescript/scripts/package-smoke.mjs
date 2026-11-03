@@ -21,11 +21,14 @@ try {
   const fixture = path.join(temporary, 'fixture'); fs.mkdirSync(fixture);
   fs.writeFileSync(path.join(fixture, 'package.json'), '{"name":"installed-smoke"}');
   fs.writeFileSync(path.join(fixture, 'App.tsx'), "import {useEffect} from 'react'; export function App(){useEffect(async()=>{},[]); return <div/>;}");
-  const cli = path.join(install, 'node_modules/codemetrics-ai/dist/cli.js');
-  const evidenceCli = path.join(install, 'node_modules/codemetrics-ai/dist/evidence-cli.js');
+  const cli = path.join(install, 'node_modules/codetestament/dist/cli.js');
+  const evidenceCli = path.join(install, 'node_modules/codetestament/dist/evidence-cli.js');
   assert.ok(fs.readFileSync(cli, 'utf8').startsWith('#!/usr/bin/env node'));
   run([cli, '--scorecard-output', 'before.json', '--sarif', 'before.sarif'], fixture);
   const evidence = JSON.parse(fs.readFileSync(path.join(fixture, 'before.json'), 'utf8'));
+  assert.equal(evidence.tool.name, 'CodeTestament.JavaScript');
+  run([evidenceCli, '--input', 'before.json', '--expected-name', evidence.tool.name], fixture);
+  run([evidenceCli, '--input', 'before.json', '--expected-name', 'codemetrics-ai'], fixture, 2);
   assert.equal(evidence.schemaVersion, 3); assert.ok(evidence.population.members >= 1);
   assert.equal(evidence.analysis.ruleset, 'javascript-typescript-2026-10-09-handler-contracts');
   assert.equal(evidence.dimensions.codeQuality.scoringDecision.operation, 'deductions');

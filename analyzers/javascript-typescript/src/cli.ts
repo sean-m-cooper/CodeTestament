@@ -14,7 +14,7 @@ try {
   } });
   const version: string = JSON.parse(fs.readFileSync(new URL("../package.json", import.meta.url), "utf8")).version;
   if (values.help) console.log([
-    "codemetrics-ai — JavaScript, TypeScript and React source analysis",
+    "codetestament — JavaScript, TypeScript and React source analysis",
     "--project <package.json> --tsconfig <tsconfig.json>",
     "--run-id <uuid> --audit-id <uuid> (generated when omitted)",
     "--output <metrics.csv> --scorecard-output <evidence.json>",

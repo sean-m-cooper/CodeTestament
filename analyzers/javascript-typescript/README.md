@@ -1,19 +1,21 @@
-# codemetrics-ai
+# codetestament
 
-Deterministic source analysis for JavaScript, TypeScript, JSX and TSX. Version 0.5.0 implements source metrics and React hook/effect checks and emits schema-v3 evidence, including executed scoring decisions. Scores are **uncalibrated across ecosystems**; compare them only with compatible runs of this analyzer.
+Deterministic source analysis for JavaScript, TypeScript, JSX and TSX. Version 0.5.1 implements source metrics and React hook/effect checks and emits schema-v3 evidence, including executed scoring decisions. Scores are **uncalibrated across ecosystems**; compare them only with compatible runs of this analyzer.
 
 Each scored dimension includes `scoringDecision`: policy inputs, executed steps, rounding and finding attribution. These are aggregate policy decisions, not independent finding deductions. See [the decision contract](../../shared/scorecard-schema/scoring-decisions.md).
+
+Version 0.5.1 retains the stable 0.5.0 scoring behavior. Create a fresh baseline after switching from `codemetrics-ai` because the producer identity changes.
 
 Version 0.5.0 uses `javascript-typescript-2026-10-09-handler-contracts` and adds
 contextual Error Handling scoring. Adopting it requires a fresh baseline. See the
 [0.5.0 release notes](../../docs/releases/javascript-typescript-0.5.0.md).
 
-The earlier 0.4.0 ruleset `javascript-typescript-2026-10-04-local-handlers` replaces the published 0.3.0 maximum-CC/median-MI ladders with owned-function population scores and extends React-only checks with bounded promise-usage analysis. It also corrects erased TypeScript syntax in owned-body measurements, scores async usage by affected eligible owners, and adds unscored module dependency, decomposition, and error-handler evidence. Generate new baselines when upgrading from 0.3.0. See the [0.4.0 release and migration notes](https://github.com/sean-m-cooper/CodeMetrics.AI/blob/master/docs/releases/javascript-typescript-0.4.0.md).
+The earlier 0.4.0 ruleset `javascript-typescript-2026-10-04-local-handlers` replaces the published 0.3.0 maximum-CC/median-MI ladders with owned-function population scores and extends React-only checks with bounded promise-usage analysis. It also corrects erased TypeScript syntax in owned-body measurements, scores async usage by affected eligible owners, and adds unscored module dependency, decomposition, and error-handler evidence. Generate new baselines when upgrading from 0.3.0. See the [0.4.0 release and migration notes](https://github.com/sean-m-cooper/CodeTestament/blob/master/docs/releases/javascript-typescript-0.4.0.md).
 
 ```sh
-npx codemetrics-ai --project package.json
-npx codemetrics-ai --project package.json --tsconfig tsconfig.json
-npx codemetrics-ai --output results/metrics.csv --scorecard-output results/evidence.json
+npx codetestament --project package.json
+npx codetestament --project package.json --tsconfig tsconfig.json
+npx codetestament --output results/metrics.csv --scorecard-output results/evidence.json
 ```
 
 Default output paths are `.scorecard/javascript-typescript/metrics.csv` and `.scorecard/javascript-typescript/evidence.json`, relative to the current directory. Node 20 or later is required. The TypeScript compiler API is a pinned runtime dependency, so an installed package can analyze source without a development checkout.
@@ -105,12 +107,12 @@ CSV preserves the shared header. Namespace is the repository-relative module pat
 ## Baselines and SARIF
 
 ```sh
-npx codemetrics-ai --baseline quality-baselines/javascript-typescript.json \
+npx codetestament --baseline quality-baselines/javascript-typescript.json \
   --comparison-output results/comparison.json --fail-on-new warning \
   --max-score-drop 0 --sarif results/analysis.sarif
 
 # Works with either .NET or JS/TS evidence:
-npx --package codemetrics-ai codemetrics-evidence --input results/evidence.json \
+npx --package codetestament codetestament-evidence --input results/evidence.json \
   --baseline quality-baselines/javascript-typescript.json --output results/comparison.json
 ```
 
@@ -141,7 +143,7 @@ The test command limits Vitest to two workers to avoid contention between concur
 
 `test:architecture` verifies eleven labeled graph examples against their observed loading behavior and tests a real, offline npm installation alongside a competing workspace version. It executes only repository-authored fixture code. Safe deferred cycles, eager initialization failures, an immediately invoked function and partial CommonJS exports demonstrate why cycle counts alone are not defect labels. Results are written to `TestResults/js-ts-architecture-context/` at the repository root. CI and npm release verification both run this check; Architecture remains unscored.
 
-The packaged `codemetrics-evidence --inspect-output <path>` command reads v2/v3 and validates optional expected provenance; historical v2 cannot be compared, gated or exported as SARIF. Structured dimension scope identifies implemented coverage. See [consumer integration](../../docs/evidence-workflows.md#skill-and-other-evidence-consumers).
+The packaged `codetestament-evidence --inspect-output <path>` command reads v2/v3 and validates optional expected provenance; historical v2 cannot be compared, gated or exported as SARIF. Structured dimension scope identifies implemented coverage. See [consumer integration](../../docs/evidence-workflows.md#skill-and-other-evidence-consumers).
 
 ## Application corpus and decomposition experiment
 
