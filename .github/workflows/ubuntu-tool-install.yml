@@ -29,5 +29,5 @@ jobs:
           dotnet new classlib -n Example
           dotnet build Example -c Release
           codetestament-dotnet --help
-          codetestament-dotnet --project Example/Example.csproj --scorecard-output evidence.json
+          codetestament-dotnet --solution Example/Example.csproj --configuration Release --skip-dependency-probe --scorecard-output evidence.json
           test -s evidence.json
