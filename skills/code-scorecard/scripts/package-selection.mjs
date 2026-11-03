@@ -8,8 +8,8 @@ export function installation(compatibility, kind, id) {
   if (!record) throw new Error(`Package selection ${id} is not in tested ${kind} installations. Exact package names and versions are required; preserve the repository pin.`);
   return record;
 }
-export function defaultInstallation(options, compatibility, kind) {
-  return installation(compatibility, kind, options[`${kind}-tool`] ?? compatibility.defaults[kind]);
+export function defaultInstallation(options, compatibility, kind, ecosystem = kind) {
+  return installation(compatibility, kind, options[`${kind}-tool`] ?? compatibility.defaults[ecosystem] ?? compatibility.defaults[kind]);
 }
 
 /** Nearest manifest wins; conflicting names/versions in that manifest never do. */
@@ -42,7 +42,9 @@ export function selectInstallation(root, entryPoint, ecosystem, options, compati
   const explicit = options[`${kind}-tool`] && defaultInstallation(options, compatibility, kind);
   if (pin && explicit && installationId(pin) !== installationId(explicit))
     throw new Error(`Explicit ${kind} selection conflicts with repository pin ${installationId(pin)}. Preserve the pin or update it intentionally.`);
-  const record = pin ?? explicit ?? defaultInstallation({}, compatibility, kind);
+  const record = pin ?? explicit ?? defaultInstallation({}, compatibility, kind, ecosystem);
+  if (ecosystem === 'javascript-typescript' && !options.existing && options['dependency-metadata'] && !record.supportsDependencyMetadata)
+    throw new Error(`${installationId(record)} does not support --dependency-metadata. Omit the flag or select a tested preview compatible with the repository pin.`);
   const tool = record.tools[ecosystem];
   if (!tool) throw new Error(`${installationId(record)} does not contain the tested ${ecosystem} analyzer. Select a supported preview package explicitly.`);
   return { record, version: tool.version, toolName: tool.name, package: record.package, packageVersion: record.version,

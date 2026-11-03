@@ -9,6 +9,8 @@ import { compatibility, discover } from '../run-scorecard.mjs';
 import { installTools, readJson } from '../runtime.mjs';
 
 const runner = fileURLToPath(new URL('../run-scorecard.mjs', import.meta.url));
+const previewTool = compatibility.defaults.npm;
+const previewVersion = previewTool.split('@')[1];
 const npmPackage = process.env.SCORECARD_NPM_PACKAGE;
 const dotnetPackage = process.env.SCORECARD_DOTNET_PACKAGE;
 
@@ -19,7 +21,7 @@ test('packaged analyzers satisfy the scorecard skill contract', { timeout: 300_0
   const cache = path.join(temporary, 'tool cache');
   const write = (file, value) => { const full = path.join(root, file); fs.mkdirSync(path.dirname(full), { recursive: true }); fs.writeFileSync(full, value); };
   const invoke = (...args) => {
-    const result = spawnSync(process.execPath, [runner, '--repo', root, '--cache', cache, '--npm-package', npmPackage, '--dotnet-package', dotnetPackage, ...args], { encoding: 'utf8', timeout: 180_000, windowsHide: true });
+    const result = spawnSync(process.execPath, [runner, '--repo', root, '--cache', cache, '--npm-tool', previewTool, '--npm-package', npmPackage, '--dotnet-package', dotnetPackage, ...args], { encoding: 'utf8', timeout: 180_000, windowsHide: true });
     assert.ifError(result.error);
     return { code: result.status, value: result.stdout.trim() ? JSON.parse(result.stdout) : null, error: result.stderr };
   };
@@ -193,7 +195,7 @@ test('packaged analyzers satisfy the scorecard skill contract', { timeout: 300_0
       const inspection=readJson(run.artifacts.inspection);
       const dimensions=inspection.evidence.dimensions;
       assert.equal(inspection.usable,true);
-      assert.equal(inspection.evidence.tool.version,compatibility.analyzers['javascript-typescript'].preferredVersion);
+      assert.equal(inspection.evidence.tool.version,previewVersion);
       const usage=dimensions.performanceAsync.scoring.observations;
       assert.equal(usage.eligibleOwners,3); assert.equal(usage.affectedOwners,0);
       const decomposition=dimensions.codeQuality.componentDetails.decomposition;
@@ -284,12 +286,12 @@ test('packaged analyzers satisfy the scorecard skill contract', { timeout: 300_0
     await t.test('unsupported schemas, provenance mismatches and incompatible pins fail explicitly', () => {
       write('archive/invalid.json', '{"schemaVersion":99}');
       assert.equal(invoke('--entry-point', 'ui/package.json', '--existing', 'archive/invalid.json').code, 2);
-      write('ui/package.json', JSON.stringify({ name: 'ui', devDependencies: { codetestament: compatibility.analyzers['javascript-typescript'].preferredVersion } }));
+      write('ui/package.json', JSON.stringify({ name: 'ui', devDependencies: { codetestament: previewVersion } }));
       const wrong = readJson(initial.artifacts.evidence); wrong.tool.version = '99.0.0';
       write('archive/wrong.json', JSON.stringify(wrong));
       const mismatch = invoke('--entry-point', 'ui/package.json', '--existing', 'archive/wrong.json');
       assert.equal(mismatch.code, 2); assert.match(mismatch.error, /tool.version/);
-      wrong.tool.version = compatibility.analyzers['javascript-typescript'].preferredVersion; wrong.subject.entryPoint = path.join(root, 'different/package.json');
+      wrong.tool.version = previewVersion; wrong.subject.entryPoint = path.join(root, 'different/package.json');
       write('archive/wrong.json', JSON.stringify(wrong));
       assert.match(invoke('--entry-point', 'ui/package.json', '--existing', 'archive/wrong.json').error, /subject.entryPoint/);
       write('ui/package.json', '{"name":"ui","devDependencies":{"codemetrics-ai":"^0.2.0"}}');

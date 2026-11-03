@@ -100,7 +100,7 @@ test('legacy pins and CodeTestament packages integrate without sharing caches', 
       defaultInstallation(modern, compatibility, 'dotnet')), /Tool setup failed/);
     // Future unpublished records still require archives, even when release defaults do not.
     const unpublished = structuredClone(compatibility);
-    unpublished.installations.npm.find(record => record.package === 'codetestament').requiresLocalPackage = true;
+    unpublished.installations.npm.find(record => record.package + '@' + record.version === modern['npm-tool']).requiresLocalPackage = true;
     const localDotnet = unpublished.installations.dotnet.find(record => record.package === 'CodeTestament.Scorecard');
     localDotnet.requiresLocalPackage = true;
     await assert.rejects(installTools({ 'npm-tool': modern['npm-tool'], cache }, unpublished), /local-only/);

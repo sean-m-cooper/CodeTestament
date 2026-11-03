@@ -12,7 +12,7 @@ test('published CodeTestament defaults agree with compatibility metadata', () =>
   assert.equal(npm.package, 'codetestament'); assert.equal(dotnet.package, 'CodeTestament.Scorecard');
   assert.equal(npm.version, compatibility.evidenceToolVersion);
   for (const ecosystem of Object.keys(compatibility.analyzers)) {
-    const record = ecosystem === 'dotnet' ? dotnet : npm;
+    const record = defaultInstallation({}, compatibility, ecosystem === 'dotnet' ? 'dotnet' : 'npm', ecosystem);
     assert.equal(record.tools[ecosystem].version, compatibility.analyzers[ecosystem].preferredVersion);
     assert.equal(record.requiresLocalPackage, false);
   }
@@ -27,7 +27,9 @@ test('selects exact package records and rejects ambiguous or conflicting reposit
   const select = options => selectInstallation(root, file, 'javascript-typescript', options ?? {}, compatibility);
   write({ name: 'app' });
   assert.equal(select().package, 'codetestament');
-  assert.equal(select().version, '0.6.0-preview.3');
+  assert.equal(select().version, '0.5.1');
+  assert.throws(() => select({ 'dependency-metadata': true }), /0.5.1 does not support --dependency-metadata/);
+  assert.equal(select({ 'npm-tool': 'codetestament@0.6.0-preview.3', 'dependency-metadata': true }).version, '0.6.0-preview.3');
   assert.equal(select({ 'npm-tool': 'codetestament@0.6.0-preview.3' }).toolName, 'CodeTestament.JavaScript');
   write({ dependencies: { 'codemetrics-ai': '0.2.0' } });
   assert.equal(select().record.version, '0.2.0');
