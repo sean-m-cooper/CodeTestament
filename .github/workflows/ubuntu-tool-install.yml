@@ -1,0 +1,33 @@
+name: Reproduce Ubuntu tool installation
+on:
+  push:
+    branches: [codex/ubuntu-tool-install-4]
+permissions:
+  contents: read
+jobs:
+  ubuntu:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        sdk: ['8.0', '10.0']
+    container: mcr.microsoft.com/dotnet/sdk:${{ matrix.sdk }}-noble
+    steps:
+      - name: Test the reported command in a fresh SDK container
+        shell: bash
+        run: |
+          cat /etc/os-release
+          dotnet --version
+          dotnet tool install -g CodeMetrics.AI || echo "Legacy install exit $?"
+      - name: Install and run the released tool on a sample project
+        if: matrix.sdk == '10.0'
+        shell: bash
+        run: |
+          dotnet tool install -g CodeTestament.Scorecard --version 2.4.0
+          export PATH="$PATH:$HOME/.dotnet/tools"
+          codetestament-dotnet --version
+          cd "$(mktemp -d)"
+          dotnet new classlib -n Example
+          dotnet build Example -c Release
+          codetestament-dotnet --help
+          codetestament-dotnet --project Example/Example.csproj --scorecard-output evidence.json
+          test -s evidence.json
