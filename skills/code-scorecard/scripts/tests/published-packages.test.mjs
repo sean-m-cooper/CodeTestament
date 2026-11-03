@@ -12,7 +12,7 @@ test('published defaults install into empty caches and validate all three ecosys
   skip: !destination, timeout: 300_000,
 }, () => {
   assert.deepEqual(compatibility.defaults, {
-    npm: 'codetestament@0.6.0-preview.3', dotnet: 'CodeTestament.Scorecard@2.4.0',
+    'javascript-typescript': 'codetestament@0.5.1', npm: 'codetestament@0.6.0-preview.3', dotnet: 'CodeTestament.Scorecard@2.4.0',
   });
   const output = path.resolve(destination);
   assert.ok(!fs.existsSync(output), 'Release verification requires a new output directory.');
@@ -47,7 +47,7 @@ test('published defaults install into empty caches and validate all three ecosys
   assert.equal(result.results.length, 3);
   assert.equal(new Set(result.results.map(run => run.runId)).size, 3);
   const expected = { dotnet: ['CodeTestament.Scorecard', '2.4.0'],
-    'javascript-typescript': ['CodeTestament.JavaScript', '0.6.0-preview.3'], python: ['CodeTestament.Python', '0.15.0'] };
+    'javascript-typescript': ['CodeTestament.JavaScript', '0.5.1'], python: ['CodeTestament.Python', '0.15.0'] };
   for (const run of result.results) {
     assert.equal(run.status, 'complete'); assert.equal(run.fresh, true);
     assert.equal(run.source, 'compatibility-manifest');
@@ -66,7 +66,7 @@ test('published defaults install into empty caches and validate all three ecosys
       assert.ok(catalog.rules.some(rule => rule.code === 'CMAI5001'));
     } else {
       const installed = JSON.parse(fs.readFileSync(path.join(run.tooling.analyzer.cache, 'node_modules/codetestament/package.json'), 'utf8'));
-      assert.equal(installed.name, 'codetestament'); assert.equal(installed.version, '0.6.0-preview.3');
+      assert.equal(installed.name, 'codetestament'); assert.equal(installed.version, run.ecosystem === 'python' ? '0.6.0-preview.3' : '0.5.1');
       const lock = JSON.parse(fs.readFileSync(path.join(run.tooling.analyzer.cache, 'package-lock.json'), 'utf8'));
       const provenance = lock.packages['node_modules/codetestament'];
       assert.match(provenance.resolved, /^https:\/\/registry\.npmjs\.org\/codetestament\/-\//);

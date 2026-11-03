@@ -364,7 +364,7 @@ test('Python Method Complexity installed package integrates with scope, freshnes
   });
   await t.test('polyglot audit preserves separate runs and a shared audit identity', () => {
     write('ui/package.json', '{"name":"fixture"}'); write('ui/app.js', 'export function app(){return 1;}');
-    const result = invoke(); assert.equal(result.code, 0, result.error);
+    const result = invoke('--npm-tool', compatibility.defaults.npm); assert.equal(result.code, 0, result.error);
     assert.deepEqual(result.value.results.map(item => item.ecosystem).sort(), ['javascript-typescript', 'python']);
     assert.equal(new Set(result.value.results.map(item => item.runId)).size, 2);
     assert.ok(result.value.results.every(item => item.auditId === result.value.auditId));

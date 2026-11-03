@@ -52,7 +52,7 @@ Comparison/gates run in CodeTestament's shared evidence CLI. Preserve the origin
 
 ## Preview packages and coordinated development
 
-The 0.6.0-preview.2 dependency-evidence analyzer adds local npm v2/v3 and pnpm v9 lockfile inventory by default. With the current preview, `--dependency-metadata` opts the JS/TS run into bounded public npm registry and advisory queries. It does not install target dependencies or run their scripts. pnpm v9 support includes catalogs, aliases, workspace links, peer snapshots, and selection of the project graph from a two-document lockfile. Environment/config tooling is explicitly excluded. Integrity-only pnpm records do not establish registry provenance. Non-public/unknown sources are not queried; credentials and repository npm configuration are not loaded. Missing metadata stays unavailable, and Dependency Management remains unscored. Stable 0.5.0 does not support this flag; the exact pinned preview does. Offline and metadata-enabled configurations require separate compatible baselines.
+The 0.6.0-preview.2 dependency-evidence analyzer adds local npm v2/v3 and pnpm v9 lockfile inventory by default. With the current preview, `--dependency-metadata` opts the JS/TS run into bounded public npm registry and advisory queries. It does not install target dependencies or run their scripts. pnpm v9 support includes catalogs, aliases, workspace links, peer snapshots, and selection of the project graph from a two-document lockfile. Environment/config tooling is explicitly excluded. Integrity-only pnpm records do not establish registry provenance. Non-public/unknown sources are not queried; credentials and repository npm configuration are not loaded. Missing metadata stays unavailable, and Dependency Management remains unscored. For JS/TS dependency metadata, select `--npm-tool codetestament@0.6.0-preview.3` in an unpinned project. Stable 0.5.x lacks this probe. Offline and metadata-enabled configurations require separate compatible baselines.
 
 ```sh
 node <skill>/scripts/run-scorecard.mjs --repo <repo> --entry-point App.csproj --skip-dependency-probe --npm-package /path/codetestament-0.6.0-preview.3.tgz --dotnet-package /path/CodeTestament.Scorecard.2.4.0.nupkg --cache /path/test-cache
@@ -62,7 +62,7 @@ Local packages must match the selected name, version and commands. A local archi
 
 ## Package selection and CodeTestament migration
 
-Use `--npm-tool <package@exact-version>` and `--dotnet-tool <package@exact-version>` to select a tested installation explicitly. A conflicting repository pin still stops the run; the helper never overrides it silently. The defaults now install published `codetestament@0.6.0-preview.3` and `CodeTestament.Scorecard@2.4.0` from registries. No selector or local archive is required. `source` records their release commit; `legacyFixtureSource` preserves the old producer used in compatibility CI. `localMigration` is a historical validation record.
+Use `--npm-tool <package@exact-version>` and `--dotnet-tool <package@exact-version>` to select a tested installation explicitly. A conflicting repository pin still stops the run; the helper never overrides it silently. The defaults select `codetestament@0.5.1` for JS/TS, `codetestament@0.6.0-preview.3` for Python, and `CodeTestament.Scorecard@2.4.0` for .NET. No selector or local archive is required. `analyzers.javascript-typescript.sourceRevision` records the stable backport commit and `source` records the .NET and preview release commit; `legacyFixtureSource` preserves the old producer used in compatibility CI. `localMigration` is a historical validation record.
 
 ```sh
 node <skill>/scripts/run-scorecard.mjs --repo <repo> --ecosystem python
@@ -77,7 +77,7 @@ For `--existing`, the npm selection chooses the reader, not a replacement produc
 
 Keep the old pin and baseline for rollback. Changing brand or tool version remains incompatible for ordinary baseline gates. Run old and new packages on the same source, review parity, and adopt a fresh new-brand baseline; do not edit old JSON or bypass gates. Python remains a partial preview with at most two scored dimensions; Error Handling is unscored. The skill name, `.scorecard` paths and CMAI codes remain unchanged.
 
-Integration CI builds the current checkout and exact `legacyFixtureSource` revision on Windows and Linux. It tests current defaults, cross-brand cache isolation, legacy exact pins, and the older 0.2.0 JS producer with the current reader. Local archive tests do not establish registry installation.
+Integration CI builds the current checkout and exact `legacyFixtureSource` revision on Windows and Linux. It tests the explicitly selected preview, cross-brand cache isolation, legacy exact pins, and the older 0.2.0 JS producer with the current reader. Local archive tests do not establish registry installation.
 
 Separate published-package tests install defaults from public registries into empty caches with no archive or selection flags, then validate all three ecosystems and Python scoring boundaries. Canonical schemas and v2 examples come from the npm package, not copies in this skill. Release and verify exact packages before changing defaults; update the source revision and package records together.
 

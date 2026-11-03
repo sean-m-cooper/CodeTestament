@@ -1,7 +1,7 @@
 # CodeTestament JavaScript and TypeScript
 
-> Published preview: `codetestament@0.6.0-preview.3`. Use this exact version;
-> existing CodeMetrics.AI/codemetrics-ai installations remain supported.
+> Stable JS/TS installs use `codetestament@0.5.1`. The examples below use
+> `codetestament@0.6.0-preview.3` for the preview features in this checkout.
 > See the [migration guide](../../docs/codetestament-migration.md).
 
 Deterministic source analysis for JavaScript, TypeScript, JSX and TSX, with Python support in preview 0.6.0-preview.3. The package implements source metrics and React hook/effect checks and emits schema-v3 evidence, including executed scoring decisions. Scores are **uncalibrated across ecosystems**; compare them only with compatible runs of this analyzer.

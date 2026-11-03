@@ -12,7 +12,7 @@ Released scorecard analyzers run in the package ecosystem natural to their targe
 | `.scorecard/<ecosystem>/evidence.json` | Scored evidence across stable quality dimensions |
 
 > **CodeTestament packages are published.** NuGet `CodeTestament.Scorecard@2.4.0`
-> and npm `codetestament@0.6.0-preview.3` are the skill defaults. See the
+> is the .NET default. JS/TS uses `codetestament@0.5.1` and Python uses `codetestament@0.6.0-preview.3`. See the
 > [migration guide](docs/codetestament-migration.md) for installation and baseline compatibility.
 
 ## Agent skill
@@ -32,7 +32,7 @@ remain honored; unpinned runs use the verified CodeTestament packages.
 | Ecosystem | Location | Package | Status |
 |-----------|----------|---------|--------|
 | .NET / C# | `analyzers/dotnet` | `CodeTestament.Scorecard@2.4.0` NuGet global tool | Available |
-| JavaScript / TypeScript / React | `analyzers/javascript-typescript` | `codetestament@0.6.0-preview.3` npm package | Implemented; scores uncalibrated |
+| JavaScript / TypeScript / React | `analyzers/javascript-typescript` | `codetestament@0.5.1` npm package | Implemented; scores uncalibrated |
 | Python | `analyzers/python` | `codetestament-python` in `codetestament@0.6.0-preview.3`; Python 3.12 required | Preview: Method Complexity and Async/Blocking Usage scoring; other evidence unscored |
 | Rust | `analyzers/rust` | Rust crate | Planned next wave |
 
@@ -78,7 +78,7 @@ for exact placement, supported spellings, and scoring effects.
 ## JavaScript / TypeScript Usage
 
 ```bash
-npm exec --yes --package=codetestament@0.6.0-preview.3 -- codetestament
+npm exec --yes --package=codetestament@0.5.1 -- codetestament
 ```
 
 The JS/TS analyzer implements source metrics, function-based complexity and maintainability, React hook/effect checks and bounded standard-Promise/Array callback checks. Its module dependency graph reports resolution coverage, type-only references, cycles and fan-in/out as unscored architecture evidence. Decomposition reports owned executable statements, and error-handling evidence resolves selected-source callback bodies without double-counting reuse. Architecture and decomposition remain unscored; the other unsupported dimensions remain unavailable. See its [README](analyzers/javascript-typescript/README.md) for scope and scoring policy, and the [0.4.0 release notes](docs/releases/javascript-typescript-0.4.0.md) for migration requirements.

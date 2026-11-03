@@ -1,9 +1,9 @@
 # Moving to CodeTestament
 
 CodeMetrics.AI is becoming **CodeTestament**, with **CodeTestament Scorecard** as
-the assessment product. NuGet `CodeTestament.Scorecard@2.4.0` and npm
+the assessment product. NuGet `CodeTestament.Scorecard@2.4.0`, stable npm `codetestament@0.5.1`, and preview npm
 `codetestament@0.6.0-preview.3` are published. GitHub is now
-`sean-m-cooper/CodeTestament`, and plugin 0.2.0 selects these exact defaults.
+`sean-m-cooper/CodeTestament`, and plugin 0.2.1 selects these exact defaults.
 Supported legacy repository pins remain honored.
 
 The [local validation checkpoint](codetestament-migration-validation.md) records
@@ -14,7 +14,8 @@ executed tests, paired artifact hashes and remaining release checks.
 | Distribution | Version | Commands |
 | --- | --- | --- |
 | NuGet `CodeTestament.Scorecard` | `2.4.0` | `codetestament-dotnet` |
-| npm `codetestament` | `0.6.0-preview.3` | `codetestament`, `codetestament-evidence`, `codetestament-python`, `codetestament-python-collect` |
+| npm `codetestament` (stable JS/TS) | `0.5.1` | `codetestament`, `codetestament-evidence` |
+| npm `codetestament` (preview) | `0.6.0-preview.3` | `codetestament`, `codetestament-evidence`, `codetestament-python`, `codetestament-python-collect` |
 
 The npm default command still analyzes JS/TS. Python remains preview, with at
 most Method Complexity and Async/Blocking Usage scored (2/9 dimensions). Error
@@ -22,14 +23,14 @@ Handling stays unscored. The Python adapter version remains `0.15.0`; it is not
 the npm distribution version. The explicit coverage collector executes tests;
 ordinary Python analysis parses source without importing the target.
 
-No stable npm build is being created from this preview source. Published
-`codemetrics-ai@0.5.0` remains the existing stable release.
+The stable npm backport comes from the released `codemetrics-ai@0.5.0` source.
+Install the preview explicitly for Python or the JS/TS dependency metadata probe.
 
 ## Install published packages
 
 ```sh
 dotnet tool install --global CodeTestament.Scorecard --version 2.4.0
-npm exec --yes --package=codetestament@0.6.0-preview.3 -- codetestament --help
+npm exec --yes --package=codetestament@0.5.1 -- codetestament --help
 npm exec --yes --package=codetestament@0.6.0-preview.3 -- codetestament-python --help
 ```
 
