@@ -2,9 +2,24 @@
 
 CodeTestament is a suite of deterministic code analyzers that produce shared scorecard evidence for AI-assisted codebase review.
 
-Its goal is to guide human and AI developers toward better, more maintainable and performant code. Scores express documented product expectations and identify opportunities for improvement; they do not prove defects or replace engineering judgment. The [complexity scoring policy](shared/scorecard-schema/calibration.md#complexity-scoring-product-decision) records the accepted method-CC bands and the distinction between product decisions and their scoring implementation. Real-world usage and developer feedback should inform explicit, versioned policy revisions.
+## Run your first scorecard
 
-Released scorecard analyzers run in the package ecosystem natural to their target language, then write the same default outputs:
+Open Claude Code in the repository you want to assess. The scorecard skill needs Node.js 20+ and npm. For .NET projects, install the .NET 10 SDK. For Python projects, install Python 3.12.
+
+Enter each line separately in Claude Code.
+
+```text
+/plugin marketplace add sean-m-cooper/ai_tools
+/plugin install codetestament@ai-tools
+/reload-plugins
+/codetestament:code-scorecard Run the scorecard against this repo.
+```
+
+The report shows which dimensions were assessed and the evidence behind their scores. Each fresh run writes its evidence and inspection under `.scorecard/<ecosystem>/runs/<runId>/`. For Codex and other hosts, see the [skill installation guide](docs/scorecard-skill.md#install-or-test).
+
+## Analyzer outputs
+
+The .NET and JS/TS command-line analyzers write these files by default. Python preview emits JSON evidence only.
 
 | File | Description |
 |------|-------------|
@@ -56,9 +71,11 @@ Stable dimensions:
 
 ## .NET Usage
 
+Install the **.NET 10 SDK** and check that `dotnet --version` selects 10.x in your project directory. Then install the tool and pass your solution or project path.
+
 ```bash
 dotnet tool install -g CodeTestament.Scorecard --version 2.4.0
-codetestament-dotnet
+codetestament-dotnet --solution YourProject.csproj --configuration Release
 ```
 
 See the [.NET analyzer README](analyzers/dotnet/README.md) for installation, usage, options, filtering, and code-annotation details.
@@ -97,7 +114,7 @@ npm exec --yes --package=codetestament@0.6.0-preview.3 -- codetestament-python -
 npm exec --yes --package=codetestament@0.6.0-preview.3 -- codetestament-evidence --input ./python-evidence.json --inspect-output ./python-inspection.json
 ```
 
-Use new output filenames for each run. Use the exact npm preview version. The existing stable release remains `codemetrics-ai@0.5.0`; there is no stable CodeTestament npm release yet. See the [preview release notes](docs/releases/python-preview-0.6.0-preview.2.md) and [Python guide](analyzers/python/README.md) for source selection, score limits, and feedback guidance.
+Use new output filenames for each run. Python ships in the exact preview package above. The stable JS/TS package is `codetestament@0.5.1`. See the [preview release notes](docs/releases/codetestament-2026-10-30.md) and [Python guide](analyzers/python/README.md) for source selection, score limits, and feedback guidance.
 
 ## Evidence and release verification
 
