@@ -6,18 +6,20 @@ Its goal is to guide human and AI developers toward better, more maintainable an
 
 ## Run your first scorecard
 
-Open Claude Code in the repository you want to assess. The scorecard skill needs Node.js 20+ and npm. For .NET projects, install the .NET 10 SDK. For Python projects, install Python 3.12.
+You need Node.js 20+ and npm. For .NET projects, install the .NET 10 SDK. For Python projects, install Python 3.12.
 
-Enter each line separately in Claude Code.
+From the repository you want to assess, install the skill in Codex:
 
-```text
-/plugin marketplace add sean-m-cooper/ai_tools
-/plugin install codetestament@ai-tools
-/reload-plugins
-/codetestament:code-scorecard Run the scorecard against this repo.
+```sh
+codex plugin marketplace add sean-m-cooper/CodeTestament
+codex plugin add codetestament@codetestament
 ```
 
-The report shows which dimensions were assessed and the evidence behind their scores. Each fresh run writes its evidence and inspection under `.scorecard/<ecosystem>/runs/<runId>/`. For Codex and other hosts, see the [skill installation guide](docs/scorecard-skill.md#install-or-test).
+Start a new Codex session in that repository and ask:
+
+> Use the CodeTestament code-scorecard skill to run the scorecard against this repo.
+
+The report shows which dimensions were assessed and the evidence behind their scores. Each fresh run writes its evidence and inspection under `.scorecard/<ecosystem>/runs/<runId>/`. For the Claude Code marketplace commands and other installation options, see the [skill installation guide](docs/scorecard-skill.md#install-or-test).
 
 ## Analyzer outputs
 
