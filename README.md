@@ -19,6 +19,8 @@ Start a new Codex session in that repository and ask:
 
 > Use the CodeTestament code-scorecard skill to run the scorecard against this repo.
 
+If your agent can write only inside the repository, ask it to pass `--cache .scorecard/cache/tools` to the skill helper and set `npm_config_cache` to an absolute path under `.scorecard/cache/npm` for the run. Allow registry access for the first install.
+
 The report shows which dimensions were assessed and the evidence behind their scores. Each fresh run writes its evidence and inspection under `.scorecard/<ecosystem>/runs/<runId>/`. For the Claude Code marketplace commands and other installation options, see the [skill installation guide](docs/scorecard-skill.md#install-or-test).
 
 ## Analyzer outputs
