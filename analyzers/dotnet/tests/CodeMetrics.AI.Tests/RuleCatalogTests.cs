@@ -63,7 +63,7 @@ public class RuleCatalogTests
         catalog.GetProperty("tool").GetProperty("version").GetString().Should().Be(new ToolInfo().Version);
         catalog.GetProperty("rules").GetArrayLength().Should().Be(44);
         RuleCatalog.Document.Rules.Where(rule => rule.Annotation.Supported).Select(rule => rule.Code)
-            .Should().BeEquivalentTo("CMAI5001", "CMAI5005", "CMAI8001", "CMAI8006");
+            .Should().BeEquivalentTo("CMAI4001", "CMAI5001", "CMAI5005", "CMAI8001", "CMAI8006");
         RuleCatalog.Find("CMAI1001")!.Annotation.Example.Should().BeNull();
         RuleCatalog.Document.Rules.Where(rule => rule.Annotation.Supported).Should().OnlyContain(rule =>
             rule.Annotation.RationaleRequired && rule.Annotation.Scopes.Length > 0 && rule.Annotation.Example != null);

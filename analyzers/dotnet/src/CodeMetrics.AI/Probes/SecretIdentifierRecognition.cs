@@ -4,7 +4,7 @@ namespace CodeMetrics.AI.Probes;
 
 internal static class SecretIdentifierRecognition
 {
-    private static readonly string[] Suffixes = ["TokenName", "Name", "Path", "Url", "Protector"];
+    private static readonly string[] Suffixes = ["TokenName", "RecordType", "Name", "Path", "Url", "Protector"];
 
     public static bool IsIdentifier(string name, string value)
     {

@@ -8,6 +8,38 @@ Policy `dotnet/security/source-sites-scoped-dependencies-v3` groups findings by 
 
 The CMAI4001 secret heuristic excludes a private field constant or local constant only when at least one use exists and every symbol-resolved use in the compilation is a pattern argument of the BCL `System.Text.RegularExpressions.Regex` API or `GeneratedRegexAttribute`. References across partial source files are checked. Public constants, mutable values, mixed credential/pattern use, regex input/replacement arguments, unresolved consumers and unrelated lookalike API types remain candidates. This is bounded semantic recognition, not regex execution or a general secret detector. It does not establish runtime security.
 
+## Secret identifiers and reviewed false positives
+
+Ruleset `dotnet-2026-11-11-secret-identifier-context` recognizes `RecordType` in the
+existing descriptive-identifier policy for CMAI4001. For example,
+`PaymentCardTokenRecordType = "paymentcardtoken"` identifies a record type.
+The normalized literal must match the declaration name after removing that
+suffix, using the existing restricted identifier characters. The same check
+applies to declarations and assignments. Credentials with unrelated values
+continue through the hardcoded-secret heuristic, including alphabetic values.
+
+For an opaque internal secret-store wrapper, the analyzer cannot verify from a
+method name that an argument is an identifier rather than a credential. Dotted
+values such as `FortisPayment.Settings` remain candidates without an accepted
+annotation. After reviewing the usage, document that distinction immediately
+above the declaration or assignment:
+
+```csharp
+// codemetrics-ignore: CMAI4001 -- AWS secret identifier; the credential is retrieved at runtime.
+const string secret = "FortisPayment.Settings";
+```
+
+Only the explicit `CMAI4001` code with a nonempty rationale excludes the finding
+before scoring. Category names, `all`, `*`, unrelated codes and empty rationales
+do not qualify. A directive can also apply to its containing member; prefer the
+narrow declaration or assignment scope. Other security rules remain active.
+Suppression declarations and rationales remain in the evidence as declared
+intent; this does not establish that the literal is safe or that AWS was called.
+The packaged rule catalog advertises this capability to the scorecard skill.
+
+These classification and annotation changes can change Security scores. Generate a fresh
+baseline for this ruleset. Calibration fixture scores and findings are retained.
+
 ## Dependency identities and retained observations
 
 Policy `dotnet/dependencyManagement/package-versions-v2` counts distinct package IDs and resolved versions for each vulnerability, deprecation or included-outdated input. Package ID/version casing is ignored. Repeating a version across projects or target frameworks cannot cross a count threshold; different resolved versions still count separately. Multiple advisories remain attached to their package rows without multiplying the version count. Missing version identity, including legacy text reports, remains unmerged.

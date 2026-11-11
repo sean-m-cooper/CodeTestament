@@ -23,6 +23,7 @@ public class SecurityContextTests
     [InlineData("PasswordAuthentication", "password-authentication")]
     [InlineData("PasswordRecovery", "password-recovery")]
     [InlineData("_changePasswordConfirmationUrl", "ChangePasswordConfirmation")]
+    [InlineData("PaymentCardTokenRecordType", "paymentcardtoken")]
     public void DescriptiveIdentifier_IsNotACredential(string name, string value)
     {
         Analyze($$"""class C { string {{name}} = "{{value}}"; void M() { {{name}} = "{{value}}"; } }""")
@@ -34,10 +35,91 @@ public class SecurityContextTests
     [InlineData("TokenName", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9")]
     [InlineData("DatabaseConnectionString", "Server=db;Password=realcredential")]
     [InlineData("TokenProtector", "abcdefghijklmnop")]
+    [InlineData("PaymentCardTokenRecordType", "r4ndomCredentialValue0123")]
+    [InlineData("PaymentCardTokenRecordType", "anothercredentialvalue")]
     public void IdentifierSuffix_DoesNotHideCredentials(string name, string value)
     {
         Analyze($$"""class C { string {{name}} = "{{value}}"; }""")
             .Findings.Should().ContainSingle(f => f.Category == "hardcodedSecret");
+    }
+
+    [Fact]
+    public void RecordTypeConstant_IsADescriptiveIdentifier()
+    {
+        var result = Analyze("""
+            class C
+            {
+                private const string PaymentCardTokenRecordType = "paymentcardtoken";
+            }
+            """);
+        result.Findings.Should().NotContain(f => f.Category == "hardcodedSecret");
+        result.Score.Should().Be(10);
+    }
+
+    [Theory]
+    [InlineData("CMAI4001 -- AWS secret identifier; value is retrieved at runtime.", false)]
+    [InlineData("cmai4001 — Reviewed secret-store identifier.", false)]
+    [InlineData("CMAI4001", true)]
+    [InlineData("CMAI4001 -- ", true)]
+    [InlineData("CMAI5001 -- Different rule.", true)]
+    [InlineData("CMAI4002 -- Different security rule.", true)]
+    [InlineData("hardcodedSecret -- Reviewed identifier.", true)]
+    [InlineData("all -- Reviewed identifier.", true)]
+    [InlineData("* -- Reviewed identifier.", true)]
+    [InlineData("", true)]
+    public void SecretIdentifierAnnotation_RequiresSpecificCodeAndRationale(string directive, bool found)
+    {
+        var result = Analyze($$"""
+            class C {
+                void M() {
+                    // codemetrics-ignore: {{directive}}
+                    const string secret = "FortisPayment.Settings";
+                    GetSecretOrConfig(secret, "userId");
+                    GetSecretOrConfig(secret, "userApiKey");
+                }
+                static string GetSecretOrConfig(string name, string field) => name;
+            }
+            """);
+        result.Findings.Any(f => f.Category == "hardcodedSecret").Should().Be(found);
+        result.Score.Should().Be(found ? 2 : 10);
+    }
+
+    [Theory]
+    [InlineData("const string secret = \"FortisPayment.Settings\";")]
+    [InlineData("secret = \"FortisPayment.Settings\";")]
+    public void SecretIdentifierAnnotation_DoesNotSuppressAdjacentCredentials(string statement)
+    {
+        var result = Analyze($$"""
+            class C {
+                string secret;
+                void M() {
+                    // codemetrics-ignore: CMAI4001 -- AWS secret identifier; value is retrieved at runtime.
+                    {{statement}}
+                    string apiKey = "actualCredentialValue1234";
+                }
+            }
+            """);
+        result.Findings.Should().ContainSingle(f => f.Category == "hardcodedSecret")
+            .Which.Message.Should().Contain("apiKey");
+    }
+
+    [Fact]
+    public void MemberSecretAnnotation_DoesNotSuppressOtherMembersOrSecurityRules()
+    {
+        var result = Analyze("""
+            class C {
+                // codemetrics-ignore: CMAI4001 -- AWS secret identifier; value is retrieved at runtime.
+                void M(string input) {
+                    const string secret = "FortisPayment.Settings";
+                    ExecuteSql($"SELECT {input}");
+                }
+                void Other() { const string password = "actualCredentialValue1234"; }
+                static void ExecuteSql(string sql) {}
+            }
+            """);
+        result.Findings.Should().ContainSingle(f => f.Category == "hardcodedSecret")
+            .Which.Message.Should().Contain("password");
+        result.Findings.Should().ContainSingle(f => f.Category == "rawSqlInterpolation");
     }
 
     private const string CorsTypes = """

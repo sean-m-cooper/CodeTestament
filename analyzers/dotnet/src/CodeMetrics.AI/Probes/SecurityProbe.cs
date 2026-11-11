@@ -108,14 +108,16 @@ public static class SecurityProbe
         foreach (var variable in root.DescendantNodes().OfType<VariableDeclaratorSyntax>())
         {
             var name = variable.Identifier.Text;
-            if (IsSecretLiteral(name, variable.Initializer?.Value) && !RegexPatternRecognition.IsPattern(variable, model))
+            if (IsSecretLiteral(name, variable.Initializer?.Value) && !RegexPatternRecognition.IsPattern(variable, model) &&
+                !FindingSuppression.IsSuppressed(variable, "hardcodedSecret", requireRuleCode: true))
                 findings.Add(CreateSecretFinding(variable, filePath, projectName,
                     $"Variable '{name}' appears to contain a hardcoded secret."));
         }
         foreach (var assignment in root.DescendantNodes().OfType<AssignmentExpressionSyntax>())
         {
             var name = AssignmentName(assignment);
-            if (IsSecretLiteral(name, assignment.Right))
+            if (IsSecretLiteral(name, assignment.Right) &&
+                !FindingSuppression.IsSuppressed(assignment, "hardcodedSecret", requireRuleCode: true))
                 findings.Add(CreateSecretFinding(assignment, filePath, projectName,
                     $"Assignment to '{name}' appears to contain a hardcoded secret."));
         }
