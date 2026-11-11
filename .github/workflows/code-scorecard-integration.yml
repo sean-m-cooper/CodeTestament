@@ -62,7 +62,7 @@ jobs:
         shell: pwsh
         run: |
           $env:SCORECARD_NPM_PACKAGE = (Get-Item packages/current/codetestament-0.6.0-preview.3.tgz).FullName
-          $env:SCORECARD_DOTNET_PACKAGE = (Get-Item packages/current/CodeTestament.Scorecard.2.4.0.nupkg).FullName
+          $env:SCORECARD_DOTNET_PACKAGE = (Get-Item packages/current/CodeTestament.Scorecard.2.4.1.nupkg).FullName
           node --test skills/code-scorecard/scripts/tests/integration.test.mjs skills/code-scorecard/scripts/tests/python.test.mjs
           exit $LASTEXITCODE
       - name: Verify current packages and cross-brand cache isolation
@@ -71,7 +71,7 @@ jobs:
           $env:SCORECARD_NPM_PACKAGE = (Get-Item packages/legacy/codemetrics-ai-0.6.0-preview.2.tgz).FullName
           $env:SCORECARD_DOTNET_PACKAGE = (Get-Item packages/legacy/CodeMetrics.AI.2.3.1.nupkg).FullName
           $env:SCORECARD_NEW_NPM_PACKAGE = (Get-Item packages/current/codetestament-0.6.0-preview.3.tgz).FullName
-          $env:SCORECARD_NEW_DOTNET_PACKAGE = (Get-Item packages/current/CodeTestament.Scorecard.2.4.0.nupkg).FullName
+          $env:SCORECARD_NEW_DOTNET_PACKAGE = (Get-Item packages/current/CodeTestament.Scorecard.2.4.1.nupkg).FullName
           npm pack codemetrics-ai@0.2.0 --pack-destination packages/legacy
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           $env:SCORECARD_OLD_JS_PACKAGE = (Get-Item packages/legacy/codemetrics-ai-0.2.0.tgz).FullName

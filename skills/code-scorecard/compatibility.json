@@ -11,10 +11,12 @@
   "analyzers": {
     "dotnet": {
       "package": "CodeTestament.Scorecard",
-      "preferredVersion": "2.4.0",
+      "preferredVersion": "2.4.1",
       "testedVersions": [
+        "2.4.1",
         "2.4.0"
-      ]
+      ],
+      "sourceRevision": "471255920a4eb86f2526de049af0e4ea29b2acae"
     },
     "python": {
       "package": "codetestament (bundled codetestament-python)",
@@ -50,7 +52,7 @@
   "evidenceToolVersion": "0.6.0-preview.3",
   "defaults": {
     "npm": "codetestament@0.6.0-preview.3",
-    "dotnet": "CodeTestament.Scorecard@2.4.0",
+    "dotnet": "CodeTestament.Scorecard@2.4.1",
     "javascript-typescript": "codetestament@0.5.1"
   },
   "installations": {
@@ -297,6 +299,20 @@
           "dotnet": {
             "name": "CodeTestament.Scorecard",
             "version": "2.4.0"
+          }
+        },
+        "requiresLocalPackage": false
+      },
+      {
+        "package": "CodeTestament.Scorecard",
+        "version": "2.4.1",
+        "commands": {
+          "dotnet": "codetestament-dotnet"
+        },
+        "tools": {
+          "dotnet": {
+            "name": "CodeTestament.Scorecard",
+            "version": "2.4.1"
           }
         },
         "requiresLocalPackage": false
