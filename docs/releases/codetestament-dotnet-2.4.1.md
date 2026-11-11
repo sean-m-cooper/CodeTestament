@@ -3,6 +3,10 @@
 This .NET patch addresses reviewed hardcoded-secret false positives without
 changing the numerical Security scoring ladder.
 
+NuGet publication now uses GitHub Actions trusted publishing through
+`NuGet/login@v1`, with a temporary credential obtained immediately before the
+upload. The release workflow no longer uses the stored `NUGET_API_KEY` secret.
+
 - A descriptive constant such as
   `PaymentCardTokenRecordType = "paymentcardtoken"` is recognized as an identifier.
   An unrelated credential value with the same declaration name still produces a
