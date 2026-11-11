@@ -1,6 +1,6 @@
 # CodeTestament Scorecard
 
-> Published as `CodeTestament.Scorecard@2.4.0`. Existing CodeMetrics.AI
+> Published as `CodeTestament.Scorecard@2.4.1`. Existing CodeMetrics.AI
 > installations continue to use `code-metrics`; the new command is
 > `codetestament-dotnet`. See the [migration guide](../../docs/codetestament-migration.md).
 
@@ -9,7 +9,7 @@ A .NET 10 global tool that performs deterministic static analysis on .NET soluti
 ## Install
 
 ```bash
-dotnet tool install -g CodeTestament.Scorecard --version 2.4.0
+dotnet tool install -g CodeTestament.Scorecard --version 2.4.1
 ```
 
 ## Usage
