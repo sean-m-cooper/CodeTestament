@@ -32,7 +32,7 @@ The .NET and JS/TS command-line analyzers write these files by default. Python p
 | `.scorecard/<ecosystem>/metrics.csv` | Raw code metrics in the shared CSV shape |
 | `.scorecard/<ecosystem>/evidence.json` | Scored evidence across stable quality dimensions |
 
-> **CodeTestament packages are published.** NuGet `CodeTestament.Scorecard@2.4.0`
+> **CodeTestament packages are published.** NuGet `CodeTestament.Scorecard@2.4.1`
 > is the .NET default. JS/TS uses `codetestament@0.5.1` and Python uses `codetestament@0.6.0-preview.3`. See the
 > [migration guide](docs/codetestament-migration.md) for installation and baseline compatibility.
 
@@ -52,7 +52,7 @@ remain honored; unpinned runs use the verified CodeTestament packages.
 
 | Ecosystem | Location | Package | Status |
 |-----------|----------|---------|--------|
-| .NET / C# | `analyzers/dotnet` | `CodeTestament.Scorecard@2.4.0` NuGet global tool | Available |
+| .NET / C# | `analyzers/dotnet` | `CodeTestament.Scorecard@2.4.1` NuGet global tool | Available |
 | JavaScript / TypeScript / React | `analyzers/javascript-typescript` | `codetestament@0.5.1` npm package | Implemented; scores uncalibrated |
 | Python | `analyzers/python` | `codetestament-python` in `codetestament@0.6.0-preview.3`; Python 3.12 required | Preview: Method Complexity and Async/Blocking Usage scoring; other evidence unscored |
 | Rust | `analyzers/rust` | Rust crate | Planned next wave |
@@ -80,7 +80,7 @@ Stable dimensions:
 Install the **.NET 10 SDK** and check that `dotnet --version` selects 10.x in your project directory. Then install the tool and pass your solution or project path.
 
 ```bash
-dotnet tool install -g CodeTestament.Scorecard --version 2.4.0
+dotnet tool install -g CodeTestament.Scorecard --version 2.4.1
 codetestament-dotnet --solution YourProject.csproj --configuration Release
 ```
 

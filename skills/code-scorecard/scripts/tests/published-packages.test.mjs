@@ -12,7 +12,7 @@ test('published defaults install into empty caches and validate all three ecosys
   skip: !destination, timeout: 300_000,
 }, () => {
   assert.deepEqual(compatibility.defaults, {
-    'javascript-typescript': 'codetestament@0.5.1', npm: 'codetestament@0.6.0-preview.3', dotnet: 'CodeTestament.Scorecard@2.4.0',
+    'javascript-typescript': 'codetestament@0.5.1', npm: 'codetestament@0.6.0-preview.3', dotnet: 'CodeTestament.Scorecard@2.4.1',
   });
   const output = path.resolve(destination);
   assert.ok(!fs.existsSync(output), 'Release verification requires a new output directory.');
@@ -23,6 +23,15 @@ test('published defaults install into empty caches and validate all three ecosys
   };
   write('app/App.csproj', '<Project Sdk="Microsoft.NET.Sdk"><PropertyGroup><TargetFramework>net10.0</TargetFramework></PropertyGroup></Project>');
   write('app/Work.cs', 'public class Work { public int Run(int value) => value > 0 ? value : 0; }');
+  write('app/Identifiers.cs', `public class Identifiers {
+    private const string PaymentCardTokenRecordType = "paymentcardtoken";
+    public string Settings() {
+      // codemetrics-ignore: CMAI4001 -- AWS secret identifier; credential retrieved at runtime.
+      const string secret = "FortisPayment.Settings";
+      return secret;
+    }
+    private const string ApiKey = "syntheticCredentialValue1234";
+  }`);
   write('ui/package.json', '{"name":"registry-fixture","private":true}');
   write('ui/work.ts', 'export function choose(value: number) { return value > 0 ? value : 0; }');
   write('python/pyproject.toml', '[project]\nname="registry-fixture"\nversion="0.0.0"\n');
@@ -46,7 +55,7 @@ test('published defaults install into empty caches and validate all three ecosys
   const result = JSON.parse(child.stdout);
   assert.equal(result.results.length, 3);
   assert.equal(new Set(result.results.map(run => run.runId)).size, 3);
-  const expected = { dotnet: ['CodeTestament.Scorecard', '2.4.0'],
+  const expected = { dotnet: ['CodeTestament.Scorecard', '2.4.1'],
     'javascript-typescript': ['CodeTestament.JavaScript', '0.5.1'], python: ['CodeTestament.Python', '0.15.0'] };
   for (const run of result.results) {
     assert.equal(run.status, 'complete'); assert.equal(run.fresh, true);
@@ -62,8 +71,14 @@ test('published defaults install into empty caches and validate all three ecosys
     if (run.ecosystem === 'dotnet') {
       assert.equal(run.ruleCatalog.status, 'available');
       const catalog = JSON.parse(fs.readFileSync(run.artifacts.ruleCatalog, 'utf8'));
-      assert.equal(catalog.tool.name, 'CodeTestament.Scorecard'); assert.equal(catalog.tool.version, '2.4.0');
+      assert.equal(catalog.tool.name, 'CodeTestament.Scorecard'); assert.equal(catalog.tool.version, '2.4.1');
       assert.ok(catalog.rules.some(rule => rule.code === 'CMAI5001'));
+      const secretRule = catalog.rules.find(rule => rule.code === 'CMAI4001');
+      assert.equal(secretRule.annotation.supported, true);
+      assert.equal(secretRule.annotation.rationaleRequired, true);
+      const secrets = evidence.dimensions.security.findings.filter(finding => finding.category === 'hardcodedSecret');
+      assert.equal(secrets.length, 1, 'Only the synthetic credential control should remain.');
+      assert.match(secrets[0].message, /ApiKey/);
     } else {
       const installed = JSON.parse(fs.readFileSync(path.join(run.tooling.analyzer.cache, 'node_modules/codetestament/package.json'), 'utf8'));
       assert.equal(installed.name, 'codetestament'); assert.equal(installed.version, run.ecosystem === 'python' ? '0.6.0-preview.3' : '0.5.1');

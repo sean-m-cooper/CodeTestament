@@ -148,7 +148,13 @@ Comment exclusion is not implemented for this rule in this analyzer version.
 
 Source matches a potential credential literal. Descriptive literals spelling the declaration name are excluded by a bounded lexical rule. Private or local constants used exclusively as semantic BCL Regex/GeneratedRegex pattern arguments are also excluded. Pattern-like names, public constants, mixed uses and unresolved consumers are not exempt. Repeated physical source sites count once with variant observations retained. Review actual use; never reproduce secret values in reports.
 
-Comment exclusion is not implemented for this rule in this analyzer version.
+Excludes this rule occurrence before scoring when CMAI4001 and a nonempty rationale are supplied. Category names and wildcard directives do not suppress this rule. This records reviewed intent, not verified credential safety.
+
+Supported scopes: statement, member. Rationale required.
+
+```csharp
+// codemetrics-ignore: CMAI4001 -- AWS secret identifier; the credential is retrieved at runtime.
+```
 
 <a id="cmai4002"></a>
 

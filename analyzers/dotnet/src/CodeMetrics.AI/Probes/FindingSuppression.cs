@@ -9,11 +9,11 @@ internal static class FindingSuppression
 {
     private const string Directive = "codemetrics-ignore:";
 
-    public static bool IsSuppressed(SyntaxNode node, string category)
+    public static bool IsSuppressed(SyntaxNode node, string category, bool requireRuleCode = false)
     {
         foreach (var current in node.AncestorsAndSelf())
         {
-            if (ContainsDirective(current.GetLeadingTrivia(), category))
+            if (ContainsDirective(current.GetLeadingTrivia(), category, requireRuleCode))
                 return true;
 
             if (current is MemberDeclarationSyntax)
@@ -23,15 +23,15 @@ internal static class FindingSuppression
         return false;
     }
 
-    private static bool ContainsDirective(SyntaxTriviaList triviaList, string category)
+    private static bool ContainsDirective(SyntaxTriviaList triviaList, string category, bool requireRuleCode)
     {
         return triviaList.Any(trivia =>
             (trivia.IsKind(SyntaxKind.SingleLineCommentTrivia) ||
              trivia.IsKind(SyntaxKind.MultiLineCommentTrivia)) &&
-            MatchesDirective(trivia.ToString(), category));
+            MatchesDirective(trivia.ToString(), category, requireRuleCode));
     }
 
-    private static bool MatchesDirective(string comment, string category)
+    private static bool MatchesDirective(string comment, string category, bool requireRuleCode)
     {
         var marker = comment.IndexOf(Directive, StringComparison.OrdinalIgnoreCase);
         if (marker < 0)
@@ -56,9 +56,9 @@ internal static class FindingSuppression
         return categories
             .Split([',', ' ', '\t'], StringSplitOptions.RemoveEmptyEntries)
             .Any(candidate =>
-                candidate.Equals(category, StringComparison.OrdinalIgnoreCase) ||
+                (!requireRuleCode && (candidate.Equals(category, StringComparison.OrdinalIgnoreCase) ||
                 candidate.Equals("all", StringComparison.OrdinalIgnoreCase) ||
-                candidate == "*" ||
+                candidate == "*")) ||
                 (!string.IsNullOrWhiteSpace(reason) && RuleCatalog.Find(candidate) is { } rule &&
                  rule.Annotation.Supported && rule.Category.Equals(category, StringComparison.OrdinalIgnoreCase)));
     }

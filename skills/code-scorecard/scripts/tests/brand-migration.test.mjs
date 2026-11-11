@@ -27,7 +27,7 @@ test('legacy pins and CodeTestament packages integrate without sharing caches', 
   };
   const legacy = { 'npm-tool': 'codemetrics-ai@0.6.0-preview.2', 'dotnet-tool': 'CodeMetrics.AI@2.3.1',
     'npm-package': oldNpm, 'dotnet-package': oldNet, 'evidence-package': newNpm };
-  const modern = { 'npm-tool': 'codetestament@0.6.0-preview.3', 'dotnet-tool': 'CodeTestament.Scorecard@2.4.0', 'npm-package': newNpm, 'dotnet-package': newNet };
+  const modern = { 'npm-tool': 'codetestament@0.6.0-preview.3', 'dotnet-tool': 'CodeTestament.Scorecard@2.4.1', 'npm-package': newNpm, 'dotnet-package': newNet };
   const success = (options, ...args) => {
     const result = invoke(options, ...args); assert.equal(result.code, 0, result.error + JSON.stringify(result.value));
     receipts.push(...result.value.results); return result.value.results[0];

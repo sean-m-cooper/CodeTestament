@@ -3,10 +3,10 @@
   "corpusSha256": "2e439e89ff5833b0567c2f74faabe6b4cafb5bcaf3482778ae004fa34197d1b0",
   "tool": {
     "name": "CodeTestament.Scorecard",
-    "version": "2.4.0",
+    "version": "2.4.1",
     "ecosystem": "dotnet"
   },
-  "ruleset": "dotnet-2026-09-15-declared-async-boundaries",
+  "ruleset": "dotnet-2026-11-11-secret-identifier-context",
   "scope": "Only listed rules have accuracy labels. Fixture distributions do not establish cross-ecosystem comparability.",
   "accuracy": {
     "errorHandling/emptyCatch": {

@@ -55,18 +55,18 @@ Comparison/gates run in CodeTestament's shared evidence CLI. Preserve the origin
 The 0.6.0-preview.2 dependency-evidence analyzer adds local npm v2/v3 and pnpm v9 lockfile inventory by default. With the current preview, `--dependency-metadata` opts the JS/TS run into bounded public npm registry and advisory queries. It does not install target dependencies or run their scripts. pnpm v9 support includes catalogs, aliases, workspace links, peer snapshots, and selection of the project graph from a two-document lockfile. Environment/config tooling is explicitly excluded. Integrity-only pnpm records do not establish registry provenance. Non-public/unknown sources are not queried; credentials and repository npm configuration are not loaded. Missing metadata stays unavailable, and Dependency Management remains unscored. For JS/TS dependency metadata, select `--npm-tool codetestament@0.6.0-preview.3` in an unpinned project. Stable 0.5.x lacks this probe. Offline and metadata-enabled configurations require separate compatible baselines.
 
 ```sh
-node <skill>/scripts/run-scorecard.mjs --repo <repo> --entry-point App.csproj --skip-dependency-probe --npm-package /path/codetestament-0.6.0-preview.3.tgz --dotnet-package /path/CodeTestament.Scorecard.2.4.0.nupkg --cache /path/test-cache
+node <skill>/scripts/run-scorecard.mjs --repo <repo> --entry-point App.csproj --skip-dependency-probe --npm-package /path/codetestament-0.6.0-preview.3.tgz --dotnet-package /path/CodeTestament.Scorecard.2.4.1.nupkg --cache /path/test-cache
 ```
 
 Local packages must match the selected name, version and commands. A local archive overrides the artifact source, not the selected package identity. The local NuGet override uses only that archive's isolated package source and caches. Never fall back to a published package with the same version when testing a local build.
 
 ## Package selection and CodeTestament migration
 
-Use `--npm-tool <package@exact-version>` and `--dotnet-tool <package@exact-version>` to select a tested installation explicitly. A conflicting repository pin still stops the run; the helper never overrides it silently. The defaults select `codetestament@0.5.1` for JS/TS, `codetestament@0.6.0-preview.3` for Python, and `CodeTestament.Scorecard@2.4.0` for .NET. No selector or local archive is required. `analyzers.javascript-typescript.sourceRevision` records the stable backport commit and `source` records the .NET and preview release commit; `legacyFixtureSource` preserves the old producer used in compatibility CI. `localMigration` is a historical validation record.
+Use `--npm-tool <package@exact-version>` and `--dotnet-tool <package@exact-version>` to select a tested installation explicitly. A conflicting repository pin still stops the run; the helper never overrides it silently. The defaults select `codetestament@0.5.1` for JS/TS, `codetestament@0.6.0-preview.3` for Python, and `CodeTestament.Scorecard@2.4.1` for .NET. No selector or local archive is required. `analyzers.dotnet.sourceRevision` and `analyzers.javascript-typescript.sourceRevision` record their release commits; `source` records the preview release commit; `legacyFixtureSource` preserves the old producer used in compatibility CI. `localMigration` is a historical validation record.
 
 ```sh
 node <skill>/scripts/run-scorecard.mjs --repo <repo> --ecosystem python
-node <skill>/scripts/run-scorecard.mjs --repo <repo> --npm-tool codetestament@0.6.0-preview.3 --npm-package /path/codetestament-0.6.0-preview.3.tgz --dotnet-tool CodeTestament.Scorecard@2.4.0 --dotnet-package /path/CodeTestament.Scorecard.2.4.0.nupkg
+node <skill>/scripts/run-scorecard.mjs --repo <repo> --npm-tool codetestament@0.6.0-preview.3 --npm-package /path/codetestament-0.6.0-preview.3.tgz --dotnet-tool CodeTestament.Scorecard@2.4.1 --dotnet-package /path/CodeTestament.Scorecard.2.4.1.nupkg
 ```
 
 The second command demonstrates optional local archives for every unambiguous discovered ecosystem. Exact supported repository pins take precedence over defaults. The canonical CodeTestament reader validates both brands, with exact tool-name enforcement in the helper and `--expected-name` in the reader.
