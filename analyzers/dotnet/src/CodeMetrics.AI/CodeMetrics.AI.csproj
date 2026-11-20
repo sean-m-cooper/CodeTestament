@@ -7,7 +7,7 @@
     <PackAsTool>true</PackAsTool>
     <ToolCommandName>codetestament-dotnet</ToolCommandName>
     <PackageId>CodeTestament.Scorecard</PackageId>
-    <Version>2.4.1</Version>
+    <Version>2.4.2</Version>
     <Description>Deterministic code metrics and scorecard evidence for .NET solutions</Description>
     <Authors>Sean Cooper</Authors>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
@@ -37,4 +37,13 @@
     <PackageReference Include="Microsoft.NET.StringTools" ExcludeAssets="runtime" PrivateAssets="all" />
     <PackageReference Include="System.CommandLine" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="../CodeTestament.NuGetFeed/CodeTestament.NuGetFeed.csproj" ReferenceOutputAssembly="false" Private="false" PrivateAssets="all" ExcludeAssets="all" />
+  </ItemGroup>
+  <Target Name="IncludeNuGetFeedHelper" BeforeTargets="GetCopyToOutputDirectoryItems;GetCopyToPublishDirectoryItems" DependsOnTargets="ResolveProjectReferences">
+    <ItemGroup>
+      <_NuGetFeedFile Include="../CodeTestament.NuGetFeed/bin/$(Configuration)/net10.0/**/*" />
+      <ContentWithTargetPath Include="@(_NuGetFeedFile)" TargetPath="NuGetFeedHelper/%(_NuGetFeedFile.RecursiveDir)%(_NuGetFeedFile.Filename)%(_NuGetFeedFile.Extension)" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+    </ItemGroup>
+  </Target>
 </Project>

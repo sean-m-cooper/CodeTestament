@@ -29,6 +29,16 @@ jobs:
       - name: Verify formatting
         run: dotnet format analyzers/dotnet/CodeMetrics.AI.slnx --no-restore --verify-no-changes
 
+      - name: Verify packaged private-feed authentication
+        shell: pwsh
+        run: |
+          dotnet pack analyzers/dotnet/src/CodeMetrics.AI/CodeMetrics.AI.csproj -c Release --no-build -o ./feed-package
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          $version = ([xml](Get-Content analyzers/dotnet/src/CodeMetrics.AI/CodeMetrics.AI.csproj -Raw)).Project.PropertyGroup.Version
+          dotnet tool install --tool-path ./feed-tool CodeTestament.Scorecard --version $version --add-source ./feed-package
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          python scripts/verify-nuget-feed-helper.py ./feed-tool
+
   javascript-typescript:
     runs-on: ubuntu-latest
     strategy:

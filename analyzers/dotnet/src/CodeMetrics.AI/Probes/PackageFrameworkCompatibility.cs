@@ -95,29 +95,33 @@ public static class PackageFrameworkCompatibility
         string commandOutput,
         CancellationToken cancellationToken = default,
         TimeSpan? budget = null,
-        HttpClient? client = null)
+        HttpClient? client = null,
+        string? workingDirectory = null)
     {
         cancellationToken.ThrowIfCancellationRequested();
         var watch = System.Diagnostics.Stopwatch.StartNew();
         var noCandidates = upgrades.Where(u => HasNoReportedCandidate(u.LatestVersion)).ToArray();
-        var groups = upgrades.Where(u => !HasNoReportedCandidate(u.LatestVersion)).GroupBy(upgrade => (upgrade.Package, upgrade.LatestVersion),
+        var groups = upgrades.Where(u => !HasNoReportedCandidate(u.LatestVersion)).GroupBy(upgrade => (upgrade.Package, upgrade.LatestVersion,
+                Context: workingDirectory == null ? "" : NuGetFeedProcess.ContextDirectory(upgrade.Project, workingDirectory)),
             StringTupleComparer.OrdinalIgnoreCase).ToList();
+        var uniquePackageVersions = groups.Select(group => (group.Key.Package.ToUpperInvariant(), group.Key.Item2.ToUpperInvariant())).Distinct().Count();
         var result = new Dictionary<OutdatedPackageUpgrade, bool>();
         var failures = new List<PackageCompatibilityFailure>();
         if (groups.Count == 0) return new(result, failures, 0, upgrades.Count, 0) { NoReportedCandidates = noCandidates };
 
         using var timeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         timeout.CancelAfter(budget ?? TimeSpan.FromSeconds(20));
-        NuGetPackageFrameworkResolver resolver;
+        NuGetPackageFrameworkResolver? resolver = null;
         try
         {
-            resolver = await NuGetPackageFrameworkResolver.CreateAsync(commandOutput, timeout.Token, client);
+            if (workingDirectory == null)
+                resolver = await NuGetPackageFrameworkResolver.CreateAsync(commandOutput, timeout.Token, client);
         }
         catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested)
         {
             foreach (var group in groups)
                 failures.Add(new(group.Key.Package, group.Key.Item2, group.Count(), ["sourceDiscoveryBudgetExceeded"]));
-            return new(result, failures, groups.Count, upgrades.Count, watch.Elapsed.TotalMilliseconds) { NoReportedCandidates = noCandidates };
+            return new(result, failures, uniquePackageVersions, upgrades.Count, watch.Elapsed.TotalMilliseconds) { NoReportedCandidates = noCandidates };
         }
         using var gate = new SemaphoreSlim(4);
         var tasks = groups.Select(async group =>
@@ -131,12 +135,21 @@ public static class PackageFrameworkCompatibility
                 entered = true;
                 if (!Regex.IsMatch(group.Key.Item2, @"^[0-9]+(?:\.[0-9]+){0,3}(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?$"))
                     reasons.Add("latestVersionUnavailable");
+                else if (workingDirectory != null)
+                    frameworks = await NuGetFeedProcess.FindAsync(group.Key.Context, commandOutput,
+                        group.Key.Package.ToLowerInvariant(), group.Key.Item2.ToLowerInvariant().Split('+')[0], timeout.Token, reasons.Add);
                 else
-                    frameworks = await resolver.FindAsync(group.Key.Package, group.Key.Item2, timeout.Token, reasons.Add);
+                    frameworks = await resolver!.FindAsync(group.Key.Package, group.Key.Item2, timeout.Token, reasons.Add);
             }
             catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested)
             {
                 reasons.Add(entered ? "packageBudgetExceeded" : "queueBudgetExceeded");
+            }
+            catch (Exception exception) when (exception is IOException or UnauthorizedAccessException or InvalidOperationException or HttpRequestException or System.Xml.XmlException or System.Text.Json.JsonException or System.ComponentModel.Win32Exception)
+            {
+                // Configuration and authentication diagnostics can contain credentials/URLs.
+                // Preserve a bounded classification only, never the exception message.
+                reasons.Add("configuredSource:" + exception.GetType().Name);
             }
             finally
             {
@@ -159,7 +172,7 @@ public static class PackageFrameworkCompatibility
                 failures.Add(new(assessment.Group.Key.Package, assessment.Group.Key.Item2,
                     missing, assessment.Reasons.Count > 0 ? assessment.Reasons.Distinct().ToArray() : ["frameworkMetadataUnsupported"]));
         }
-        return new(result, failures, groups.Count, upgrades.Count, watch.Elapsed.TotalMilliseconds) { NoReportedCandidates = noCandidates };
+        return new(result, failures, uniquePackageVersions, upgrades.Count, watch.Elapsed.TotalMilliseconds) { NoReportedCandidates = noCandidates };
     }
 
     private static IEnumerable<string> SplitLines(string text)
@@ -169,25 +182,27 @@ public static class PackageFrameworkCompatibility
             : text.Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries);
     }
 
-    private sealed class StringTupleComparer : IEqualityComparer<(string Package, string Version)>
+    private sealed class StringTupleComparer : IEqualityComparer<(string Package, string Version, string Context)>
     {
         public static readonly StringTupleComparer OrdinalIgnoreCase = new();
 
         public bool Equals(
-            (string Package, string Version) x,
-            (string Package, string Version) y)
+            (string Package, string Version, string Context) x,
+            (string Package, string Version, string Context) y)
         {
             return StringComparer.OrdinalIgnoreCase.Equals(x.Package, y.Package) &&
-                   StringComparer.OrdinalIgnoreCase.Equals(x.Version, y.Version);
+                   StringComparer.OrdinalIgnoreCase.Equals(x.Version, y.Version) && ContextComparer.Equals(x.Context, y.Context);
         }
 
-        public int GetHashCode((string Package, string Version) obj)
+        private static StringComparer ContextComparer => OperatingSystem.IsWindows() ? StringComparer.OrdinalIgnoreCase : StringComparer.Ordinal;
+
+        public int GetHashCode((string Package, string Version, string Context) obj)
         {
             return HashCode.Combine(
                 StringComparer.OrdinalIgnoreCase.GetHashCode(obj.Package),
                 obj.Version == null
                     ? 0
-                    : StringComparer.OrdinalIgnoreCase.GetHashCode(obj.Version));
+                    : StringComparer.OrdinalIgnoreCase.GetHashCode(obj.Version), ContextComparer.GetHashCode(obj.Context));
         }
     }
 }
