@@ -20,6 +20,10 @@ The numerical scoring ladders, evidence schema and ruleset are unchanged. A prev
 unavailable dependency score can become available when candidate metadata is accessible.
 No npm package changes are required.
 
+CodeTestament plugin 0.2.3 selects .NET 2.4.2 by default. Exact repository pins
+remain honored, including 2.4.0 and 2.4.1; update those pins explicitly to adopt
+the fix. JS/TS remains on 0.5.1 and Python on 0.6.0-preview.3.
+
 Validation includes authenticated local-feed regressions, source mapping, per-project
 configuration, missing candidates, redaction, cancellation and an installed-package
 download smoke test. AMP's private AWS account is not part of automated validation.
