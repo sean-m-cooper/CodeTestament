@@ -174,7 +174,23 @@ public sealed class ConfiguredNuGetFeedTests
             if (disabled) root.Add(new XElement("disabledPackageSources", new XElement("add", new XAttribute("key", "Private"), new XAttribute("value", "true"))));
             new XDocument(root).Save(System.IO.Path.Combine(Path, "NuGet.Config"));
         }
-        public void Dispose() => Directory.Delete(Path, recursive: true);
+        public void Dispose()
+        {
+            // Windows can retain a terminated process's working-directory handle briefly.
+            // Retry cleanup only; a persistent handle leak must still fail the test.
+            for (var attempt = 0; ; attempt++)
+            {
+                try
+                {
+                    Directory.Delete(Path, recursive: true);
+                    return;
+                }
+                catch (IOException) when (OperatingSystem.IsWindows() && attempt < 50)
+                {
+                    Thread.Sleep(100);
+                }
+            }
+        }
     }
 
     private sealed class TestFeed : IAsyncDisposable
