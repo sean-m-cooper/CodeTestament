@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="NuGet.Credentials" />
+    <PackageReference Include="NuGet.Protocol" />
+    <PackageReference Include="System.Security.Cryptography.Pkcs" />
+    <Compile Include="../CodeMetrics.AI/Probes/PackageAssetInspector.cs" Link="Shared/PackageAssetInspector.cs" />
+    <Compile Include="../CodeMetrics.AI/Probes/PackageMetadataRanges.cs" Link="Shared/PackageMetadataRanges.cs" />
+    <Compile Include="../CodeMetrics.AI/Probes/PackageZipDirectory.cs" Link="Shared/PackageZipDirectory.cs" />
+    <Compile Include="../CodeMetrics.AI/Probes/NuGetPackageClient.cs" Link="Shared/NuGetPackageClient.cs" />
+    <Compile Include="../CodeMetrics.AI/Probes/NuGetServiceIndexClient.cs" Link="Shared/NuGetServiceIndexClient.cs" />
+    <Compile Include="../CodeMetrics.AI/Probes/LocalPackageFrameworkResolver.cs" Link="Shared/LocalPackageFrameworkResolver.cs" />
+    <Compile Include="../CodeMetrics.AI/Probes/PackageFeedProtocol.cs" Link="Shared/PackageFeedProtocol.cs" />
+  </ItemGroup>
+</Project>

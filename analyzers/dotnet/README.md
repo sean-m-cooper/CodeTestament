@@ -1,6 +1,6 @@
 # CodeTestament Scorecard
 
-> Published as `CodeTestament.Scorecard@2.4.1`. Existing CodeMetrics.AI
+> Published as `CodeTestament.Scorecard@2.4.2`. Existing CodeMetrics.AI
 > installations continue to use `code-metrics`; the new command is
 > `codetestament-dotnet`. See the [migration guide](../../docs/codetestament-migration.md).
 
@@ -9,7 +9,7 @@ A .NET 10 global tool that performs deterministic static analysis on .NET soluti
 ## Install
 
 ```bash
-dotnet tool install -g CodeTestament.Scorecard --version 2.4.1
+dotnet tool install -g CodeTestament.Scorecard --version 2.4.2
 ```
 
 ## Usage
@@ -27,6 +27,10 @@ codetestament-dotnet --skip-dependency-probe
 # Custom output paths
 codetestament-dotnet --output ./results/metrics.csv --scorecard-output ./results/evidence.json
 ```
+
+## Private feeds
+
+Candidate inspection uses the project's NuGet configuration, credentials, credential providers and package-source mapping. See the [private-feed guide](../../docs/private-nuget-feeds.md), including AWS CodeArtifact setup and failure diagnostics.
 
 ## Output
 

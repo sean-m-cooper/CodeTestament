@@ -56,7 +56,7 @@ public static class DependencyProbe
                 compatibilityAssessment = await PackageFrameworkCompatibility.AssessAsync(
                     assessableUpgrades,
                     outdated.StandardOutput,
-                    cancellationToken);
+                    cancellationToken, workingDirectory: solutionDir);
             }
 
             return AnalyzeOutput(

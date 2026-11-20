@@ -17,6 +17,8 @@ jobs:
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
+        env:
+          DOTNET_INSTALL_DIR: ${{ runner.temp }}/codetestament-dotnet
         with:
           dotnet-version: '10.0.x'
 
@@ -43,6 +45,8 @@ jobs:
             --skip-dependency-probe
 
           python3 -c 'import json,sys; actual=json.load(open("/tmp/code-metrics-evidence.json"))["tool"]["version"]; expected=sys.argv[1]; assert actual == expected, f"evidence version {actual!r} != package version {expected!r}"' "$version"
+
+          python3 scripts/verify-nuget-feed-helper.py ./tool-smoke
 
       - name: Authenticate to NuGet with trusted publishing
         uses: NuGet/login@v1

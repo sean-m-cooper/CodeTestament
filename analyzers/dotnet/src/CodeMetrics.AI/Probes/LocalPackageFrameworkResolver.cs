@@ -7,7 +7,8 @@ internal static class LocalPackageFrameworkResolver
     public static PackageFrameworkSet? Find(
         string package,
         string version,
-        IReadOnlyList<string> localSources)
+        IReadOnlyList<string> localSources,
+        string? globalPackages = null)
     {
         foreach (var source in localSources)
         {
@@ -17,7 +18,7 @@ internal static class LocalPackageFrameworkResolver
                 return frameworks;
         }
 
-        var packageDirectories = FindPackageDirectories(package, version, localSources);
+        var packageDirectories = FindPackageDirectories(package, version, localSources, globalPackages);
         foreach (var directory in packageDirectories.Distinct(StringComparer.OrdinalIgnoreCase))
         {
             var frameworks = TryInspectDirectory(directory);
@@ -31,10 +32,10 @@ internal static class LocalPackageFrameworkResolver
     private static IReadOnlyList<string> FindPackageDirectories(
         string package,
         string version,
-        IReadOnlyList<string> localSources)
+        IReadOnlyList<string> localSources, string? globalPackages)
     {
         var packageDirectories = new List<string>();
-        AddGlobalPackageDirectory(packageDirectories, package, version);
+        AddGlobalPackageDirectory(packageDirectories, package, version, globalPackages);
         AddLocalPackageDirectories(packageDirectories, package, version, localSources);
         return packageDirectories;
     }
@@ -42,9 +43,9 @@ internal static class LocalPackageFrameworkResolver
     private static void AddGlobalPackageDirectory(
         ICollection<string> packageDirectories,
         string package,
-        string version)
+        string version, string? configuredGlobalPackages)
     {
-        var globalPackages = Environment.GetEnvironmentVariable("NUGET_PACKAGES");
+        var globalPackages = configuredGlobalPackages ?? Environment.GetEnvironmentVariable("NUGET_PACKAGES");
         if (string.IsNullOrWhiteSpace(globalPackages))
         {
             var userProfile = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);

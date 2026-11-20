@@ -30,6 +30,8 @@ internal static class NuGetServiceIndexClient
             catch (Exception ex) when (
                 ex is HttpRequestException or IOException or JsonException or InvalidOperationException or TaskCanceledException)
             {
+                if (ex is HttpRequestException { StatusCode: { } status })
+                    reportFailure?.Invoke($"sourceIndexHttpStatus:{(int)status}");
                 reportFailure?.Invoke("sourceIndex:" + ex.GetType().Name);
                 // Other configured sources may still provide the package.
                 continue;

@@ -12,7 +12,7 @@ test('published defaults install into empty caches and validate all three ecosys
   skip: !destination, timeout: 300_000,
 }, () => {
   assert.deepEqual(compatibility.defaults, {
-    'javascript-typescript': 'codetestament@0.5.1', npm: 'codetestament@0.6.0-preview.3', dotnet: 'CodeTestament.Scorecard@2.4.1',
+    'javascript-typescript': 'codetestament@0.5.1', npm: 'codetestament@0.6.0-preview.3', dotnet: 'CodeTestament.Scorecard@2.4.2',
   });
   const output = path.resolve(destination);
   assert.ok(!fs.existsSync(output), 'Release verification requires a new output directory.');
@@ -55,7 +55,7 @@ test('published defaults install into empty caches and validate all three ecosys
   const result = JSON.parse(child.stdout);
   assert.equal(result.results.length, 3);
   assert.equal(new Set(result.results.map(run => run.runId)).size, 3);
-  const expected = { dotnet: ['CodeTestament.Scorecard', '2.4.1'],
+  const expected = { dotnet: ['CodeTestament.Scorecard', '2.4.2'],
     'javascript-typescript': ['CodeTestament.JavaScript', '0.5.1'], python: ['CodeTestament.Python', '0.15.0'] };
   for (const run of result.results) {
     assert.equal(run.status, 'complete'); assert.equal(run.fresh, true);
@@ -71,7 +71,7 @@ test('published defaults install into empty caches and validate all three ecosys
     if (run.ecosystem === 'dotnet') {
       assert.equal(run.ruleCatalog.status, 'available');
       const catalog = JSON.parse(fs.readFileSync(run.artifacts.ruleCatalog, 'utf8'));
-      assert.equal(catalog.tool.name, 'CodeTestament.Scorecard'); assert.equal(catalog.tool.version, '2.4.1');
+      assert.equal(catalog.tool.name, 'CodeTestament.Scorecard'); assert.equal(catalog.tool.version, '2.4.2');
       assert.ok(catalog.rules.some(rule => rule.code === 'CMAI5001'));
       const secretRule = catalog.rules.find(rule => rule.code === 'CMAI4001');
       assert.equal(secretRule.annotation.supported, true);
