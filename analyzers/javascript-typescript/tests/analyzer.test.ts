@@ -116,6 +116,48 @@ describe("evidence workflows", () => {
     const after=run(fixture({...files,"tsconfig.json":'{"include":["src/**/*.ts"]}'})).evidence;
     expect(()=>compare(after,before)).toThrow("configurationFingerprint");
   });
+  it("compares equivalent root-relative compiler settings across worktrees", () => {
+    const files = { ".git": "gitdir: worktree-metadata", "tsconfig.json": JSON.stringify({
+      compilerOptions: { baseUrl: ".", rootDir: ".", rootDirs: [".", "src"],
+        paths: { "@/*": ["src/*"] }, typeRoots: ["./types"] }, include: ["src/**/*.ts"] }),
+      "src/a.ts": "export const a=(value:boolean)=>value ? 1 : 0;" };
+    const before = run(fixture(files)).evidence;
+    const after = run(fixture(files)).evidence;
+    expect(after.subject.root).not.toBe(before.subject.root);
+    expect(after.analysis.configurationFingerprint).toBe(before.analysis.configurationFingerprint);
+    expect(compare(after, before).compatible).toBe(true);
+    expect(gate(compare(after, before), "warning", 0)).toBe(false);
+  });
+  it("keeps inherited workspace compiler settings portable", () => {
+    const files = { ".git": "gitdir: worktree-metadata",
+      "package.json": '{"name":"workspace","workspaces":["packages/*"]}',
+      "tsconfig.base.json": '{"compilerOptions":{"baseUrl":".","rootDir":".","strict":true}}',
+      "packages/ui/package.json": '{"name":"ui"}',
+      "packages/ui/tsconfig.json": '{"extends":"../../tsconfig.base.json","include":["src/**/*.ts"]}',
+      "packages/ui/src/a.ts": "export const a=()=>1;" };
+    const before = run(fixture(files)).evidence;
+    const after = run(fixture(files)).evidence;
+    expect(compare(after, before).compatible).toBe(true);
+  });
+  it.each([
+    { baseUrl: "src", rootDir: ".", strict: true },
+    { baseUrl: ".", rootDir: "src", strict: true },
+    { baseUrl: ".", rootDir: ".", strict: false },
+  ])("still rejects meaningful compiler setting changes: %j", compilerOptions => {
+    const files = { "tsconfig.json": JSON.stringify({ compilerOptions: { baseUrl: ".", rootDir: ".", strict: true } }),
+      "src/a.ts": "export const a=()=>1;" };
+    const before = run(fixture(files)).evidence;
+    const after = run(fixture({ ...files, "tsconfig.json": JSON.stringify({ compilerOptions }) })).evidence;
+    expect(() => compare(after, before)).toThrow("configurationFingerprint");
+    expect(() => gate(compare(after, before, true), "warning", 0)).toThrow("incompatible");
+  });
+  it("does not erase configuration paths outside the worktree", () => {
+    const beforeRoot = fixture({ "src/a.ts": "export const a=()=>1;" });
+    const afterRoot = fixture({ "src/a.ts": "export const a=()=>1;" });
+    for (const root of [beforeRoot, afterRoot]) fs.writeFileSync(path.join(root, "tsconfig.json"),
+      JSON.stringify({ compilerOptions: { baseUrl: root + "-external" } }));
+    expect(() => compare(run(afterRoot).evidence, run(beforeRoot).evidence)).toThrow("configurationFingerprint");
+  });
   it("executes the compiled CLI with actual custom output paths and invalid arguments", () => {
     const root=fixture({"src/a.js":"export const a=()=>1;"});
     const cli=path.resolve("dist/cli.js");

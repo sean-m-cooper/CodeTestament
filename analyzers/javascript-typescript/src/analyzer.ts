@@ -84,7 +84,14 @@ export function analyze(options: { project?: string; tsconfig?: string; runId?: 
   return { evidence, metrics, csv: toCsv(metrics), inputs: [...dependencies.inputs,...discovery.packages.flatMap(pkg => [pkg.entryPoint, ...pkg.files])] };
 }
 function canonicalConfiguration(value: unknown, root: string): unknown {
-  if (typeof value === "string") return value.replaceAll("\\", "/").replace(root.replaceAll("\\", "/") + "/", "<root>/");
+  if (typeof value === "string") {
+    const normalized = value.replaceAll("\\", "/");
+    const normalizedRoot = root.replaceAll("\\", "/").replace(/\/+$/, "");
+    // TypeScript resolves baseUrl/rootDir "." (and pathsBasePath) to the root itself.
+    // Normalize only the root or its descendants, not an embedded or sibling path.
+    if (normalized === normalizedRoot || normalized === normalizedRoot + "/") return "<root>";
+    return normalized.startsWith(normalizedRoot + "/") ? "<root>/" + normalized.slice(normalizedRoot.length + 1) : normalized;
+  }
   if (Array.isArray(value)) return value.map(item => canonicalConfiguration(item, root));
   if (value && typeof value === "object") return Object.fromEntries(Object.entries(value).sort(([a],[b]) => a < b ? -1 : 1)
     .map(([key,item]) => [key,canonicalConfiguration(item,root)]));

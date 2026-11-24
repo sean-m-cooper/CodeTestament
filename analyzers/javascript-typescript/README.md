@@ -130,6 +130,13 @@ CSV preserves the shared header. Namespace is the repository-relative module pat
 
 ## Baselines and SARIF
 
+Development builds normalize compiler paths equal to the repository root as well
+as paths beneath it, so equivalent settings such as `baseUrl: "."` and
+`rootDir: "."` compare across worktrees. Actual configuration differences still
+reject comparisons. Baselines affected by the older path-dependent hash must be
+regenerated from their original source revision with the corrected analyzer;
+see [portable configuration and migration](../../docs/evidence-workflows.md#portable-jsts-configuration-development).
+
 ```sh
 npm exec --yes --package=codetestament@0.6.0-preview.3 -- codetestament --baseline quality-baselines/javascript-typescript.json \
   --comparison-output results/comparison.json --fail-on-new warning \
