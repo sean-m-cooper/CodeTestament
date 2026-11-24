@@ -1,6 +1,6 @@
 # Generate and validate scorecard evidence
 
-Requires Node.js 20+ with npm for the shared evidence tooling. .NET analysis additionally requires the .NET 10 SDK plus SDKs/workloads required by the target project. Restore the selected .NET entry point before analysis using its repository's normal restore procedure. JavaScript analysis does not run the target package's scripts. Python preview additionally requires Python 3.12; read [python.md](python.md).
+Requires Node.js 20+ with npm for the shared evidence tooling. .NET analysis additionally requires the .NET 10 SDK plus SDKs/workloads required by the target project. Restore the selected .NET entry point before analysis using its repository's normal restore procedure. JavaScript analysis does not run the target package's scripts. Python additionally requires Python 3.12; read [python.md](python.md).
 
 Resolve `<skill>` to this skill directory and `<repo>` to the audited repository. Use argument arrays or normal shell quoting for paths with spaces.
 
@@ -68,23 +68,23 @@ node <skill>/scripts/run-scorecard.mjs --repo <repo> --entry-point package.json 
 
 Comparison/gates run in CodeTestament's shared evidence CLI. Preserve the original baseline file outside new run outputs. Versions, rulesets, configurations, dimension availability and scope must match, and both runs must be complete. Incompatible evidence yields exit 2; a compatible policy violation yields exit 1. SARIF export is available directly through the cached `codetestament-evidence` CLI; see CodeTestament's evidence workflow documentation.
 
-## Preview packages and coordinated development
+## Dependency evidence and coordinated development
 
-The 0.6.0-preview.2 dependency-evidence analyzer adds local npm v2/v3 and pnpm v9 lockfile inventory by default. With the current preview, `--dependency-metadata` opts the JS/TS run into bounded public npm registry and advisory queries. It does not install target dependencies or run their scripts. pnpm v9 support includes catalogs, aliases, workspace links, peer snapshots, and selection of the project graph from a two-document lockfile. Environment/config tooling is explicitly excluded. Integrity-only pnpm records do not establish registry provenance. Non-public/unknown sources are not queried; credentials and repository npm configuration are not loaded. Missing metadata stays unavailable, and Dependency Management remains unscored. For JS/TS dependency metadata, select `--npm-tool codetestament@0.6.0-preview.4` in an unpinned project. Stable 0.5.x lacks this probe. Offline and metadata-enabled configurations require separate compatible baselines.
+Stable 0.6.0 includes local npm v2/v3 and pnpm v9 lockfile inventory by default. With 0.6.0, `--dependency-metadata` opts the JS/TS run into bounded public npm registry and advisory queries. It does not install target dependencies or run their scripts. pnpm v9 support includes catalogs, aliases, workspace links, peer snapshots, and selection of the project graph from a two-document lockfile. Environment/config tooling is explicitly excluded. Integrity-only pnpm records do not establish registry provenance. Non-public/unknown sources are not queried; credentials and repository npm configuration are not loaded. Missing metadata stays unavailable, and Dependency Management remains unscored. For JS/TS dependency metadata, use `--dependency-metadata` with the default 0.6.0 package in an unpinned project. Stable 0.5.x lacks this probe. Offline and metadata-enabled configurations require separate compatible baselines.
 
 ```sh
-node <skill>/scripts/run-scorecard.mjs --repo <repo> --entry-point App.csproj --skip-dependency-probe --npm-package /path/codetestament-0.6.0-preview.4.tgz --dotnet-package /path/CodeTestament.Scorecard.2.4.3.nupkg --cache /path/test-cache
+node <skill>/scripts/run-scorecard.mjs --repo <repo> --entry-point App.csproj --skip-dependency-probe --npm-package /path/codetestament-0.6.0.tgz --dotnet-package /path/CodeTestament.Scorecard.2.4.3.nupkg --cache /path/test-cache
 ```
 
 Local packages must match the selected name, version and commands. A local archive overrides the artifact source, not the selected package identity. The local NuGet override uses only that archive's isolated package source and caches. Never fall back to a published package with the same version when testing a local build.
 
 ## Package selection and CodeTestament migration
 
-Use `--npm-tool <package@exact-version>` and `--dotnet-tool <package@exact-version>` to select a tested installation explicitly. A conflicting repository pin still stops the run; the helper never overrides it silently. The defaults select `codetestament@0.5.2` for JS/TS, `codetestament@0.6.0-preview.4` for Python, and `CodeTestament.Scorecard@2.4.3` for .NET. No selector or local archive is required. `analyzers.dotnet.sourceRevision` and `analyzers.javascript-typescript.sourceRevision` record their release commits; `source` records the preview release commit; `legacyFixtureSource` preserves the old producer used in compatibility CI. `localMigration` is a historical validation record.
+Use `--npm-tool <package@exact-version>` and `--dotnet-tool <package@exact-version>` to select a tested installation explicitly. A conflicting repository pin still stops the run; the helper never overrides it silently. The defaults select `codetestament@0.6.0` for JS/TS, `codetestament@0.6.0` for Python, and `CodeTestament.Scorecard@2.4.3` for .NET. No selector or local archive is required. `analyzers.dotnet.sourceRevision` and `analyzers.javascript-typescript.sourceRevision` record their release commits; `source` records the shared npm release commit; `legacyFixtureSource` preserves the old producer used in compatibility CI. `localMigration` is a historical validation record.
 
 ```sh
 node <skill>/scripts/run-scorecard.mjs --repo <repo> --ecosystem python
-node <skill>/scripts/run-scorecard.mjs --repo <repo> --npm-tool codetestament@0.6.0-preview.4 --npm-package /path/codetestament-0.6.0-preview.4.tgz --dotnet-tool CodeTestament.Scorecard@2.4.3 --dotnet-package /path/CodeTestament.Scorecard.2.4.3.nupkg
+node <skill>/scripts/run-scorecard.mjs --repo <repo> --npm-tool codetestament@0.6.0 --npm-package /path/codetestament-0.6.0.tgz --dotnet-tool CodeTestament.Scorecard@2.4.3 --dotnet-package /path/CodeTestament.Scorecard.2.4.3.nupkg
 ```
 
 The second command demonstrates optional local archives for every unambiguous discovered ecosystem. Exact supported repository pins take precedence over defaults. The canonical CodeTestament reader validates both brands, with exact tool-name enforcement in the helper and `--expected-name` in the reader.
@@ -93,9 +93,9 @@ The second command demonstrates optional local archives for every unambiguous di
 
 For `--existing`, the npm selection chooses the reader, not a replacement producer. Historical evidence retains its recorded name/version, unless a repository pin explicitly requires an exact match. The default CodeTestament reader accepts supported evidence from either brand. The helper still rejects stale invocation IDs on fresh runs, unsupported producer identities, incomplete analysis and mismatched provenance. Historical imports never become fresh evidence.
 
-Keep the old pin and baseline for rollback. Changing brand or tool version remains incompatible for ordinary baseline gates. Run old and new packages on the same source, review parity, and adopt a fresh new-brand baseline; do not edit old JSON or bypass gates. Python remains a partial preview with at most two scored dimensions; Error Handling is unscored. The skill name, `.scorecard` paths and CMAI codes remain unchanged.
+Keep the old pin and baseline for rollback. Changing brand or tool version remains incompatible for ordinary baseline gates. Run old and new packages on the same source, review parity, and adopt a fresh new-brand baseline; do not edit old JSON or bypass gates. Python remains a partial assessment with at most two scored dimensions; Error Handling is unscored. The skill name, `.scorecard` paths and CMAI codes remain unchanged.
 
-Integration CI builds the current checkout and exact `legacyFixtureSource` revision on Windows and Linux. It tests the explicitly selected preview, cross-brand cache isolation, legacy exact pins, and the older 0.2.0 JS producer with the current reader. Local archive tests do not establish registry installation.
+Integration CI builds the current checkout and exact `legacyFixtureSource` revision on Windows and Linux. It tests the explicitly selected current package, cross-brand cache isolation, legacy exact pins, and the older 0.2.0 JS producer with the current reader. Local archive tests do not establish registry installation.
 
 Separate published-package tests install defaults from public registries into empty caches with no archive or selection flags, then validate all three ecosystems and Python scoring boundaries. Canonical schemas and v2 examples come from the npm package, not copies in this skill. Release and verify exact packages before changing defaults; update the source revision and package records together.
 
@@ -111,4 +111,4 @@ For an explicit historical `--existing` import, the helper's `runId` identifies 
 
 ## Python development verification
 
-Build the local CodeTestament npm archive and set `SCORECARD_NPM_PACKAGE` to its absolute path, then run `node --test skills/code-scorecard/scripts/tests/python.test.mjs` with Python 3.12 installed. Collection integration tests need coverage.py 7.6.1; set `CODEMETRICS_COVERAGE_PYTHON` to an isolated interpreter containing it when the default interpreter lacks coverage. Tests cover packaged execution, selection, parse failure, historical imports, stale IDs, coverage forwarding, explicit collection, source drift, polyglot identity, and local-package provenance. The coordinated source revision must contain the exact preview implementation. Published-package verification additionally runs from a fresh cache without a local-package override.
+Build the local CodeTestament npm archive and set `SCORECARD_NPM_PACKAGE` to its absolute path, then run `node --test skills/code-scorecard/scripts/tests/python.test.mjs` with Python 3.12 installed. Collection integration tests need coverage.py 7.6.1; set `CODEMETRICS_COVERAGE_PYTHON` to an isolated interpreter containing it when the default interpreter lacks coverage. Tests cover packaged execution, selection, parse failure, historical imports, stale IDs, coverage forwarding, explicit collection, source drift, polyglot identity, and local-package provenance. The coordinated source revision must contain the exact package implementation. Published-package verification additionally runs from a fresh cache without a local-package override.

@@ -12,7 +12,7 @@ test('published defaults install into empty caches and validate all three ecosys
   skip: !destination, timeout: 300_000,
 }, () => {
   assert.deepEqual(compatibility.defaults, {
-    'javascript-typescript': 'codetestament@0.5.2', npm: 'codetestament@0.6.0-preview.4', dotnet: 'CodeTestament.Scorecard@2.4.3',
+    'javascript-typescript': 'codetestament@0.6.0', npm: 'codetestament@0.6.0', dotnet: 'CodeTestament.Scorecard@2.4.3',
   });
   const output = path.resolve(destination);
   assert.ok(!fs.existsSync(output), 'Release verification requires a new output directory.');
@@ -77,7 +77,7 @@ public class UnsafeSql {
   assert.equal(result.results.length, 3);
   assert.equal(new Set(result.results.map(run => run.runId)).size, 3);
   const expected = { dotnet: ['CodeTestament.Scorecard', '2.4.3'],
-    'javascript-typescript': ['CodeTestament.JavaScript', '0.5.2'], python: ['CodeTestament.Python', '0.15.0'] };
+    'javascript-typescript': ['CodeTestament.JavaScript', '0.6.0'], python: ['CodeTestament.Python', '0.15.0'] };
   for (const run of result.results) {
     assert.equal(run.status, 'complete'); assert.equal(run.fresh, true);
     assert.equal(run.source, 'compatibility-manifest');
@@ -106,7 +106,7 @@ public class UnsafeSql {
       assert.match(sql[0].message, /ExecuteSqlRaw/);
     } else {
       const installed = JSON.parse(fs.readFileSync(path.join(run.tooling.analyzer.cache, 'node_modules/codetestament/package.json'), 'utf8'));
-      assert.equal(installed.name, 'codetestament'); assert.equal(installed.version, run.ecosystem === 'python' ? '0.6.0-preview.4' : '0.5.2');
+      assert.equal(installed.name, 'codetestament'); assert.equal(installed.version, '0.6.0');
       const lock = JSON.parse(fs.readFileSync(path.join(run.tooling.analyzer.cache, 'package-lock.json'), 'utf8'));
       const provenance = lock.packages['node_modules/codetestament'];
       assert.match(provenance.resolved, /^https:\/\/registry\.npmjs\.org\/codetestament\/-\//);

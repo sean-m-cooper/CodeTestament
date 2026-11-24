@@ -1,8 +1,8 @@
 {
   "$schema": "https://json.schemastore.org/claude-code-plugin.json",
   "name": "codetestament",
-  "version": "0.2.5",
-  "description": "Evidence-backed code scorecards for .NET, JavaScript/TypeScript, and the Python preview.",
+  "version": "0.3.0",
+  "description": "Evidence-backed code scorecards for .NET, JavaScript/TypeScript, and Python.",
   "author": {
     "name": "Sean Cooper"
   },

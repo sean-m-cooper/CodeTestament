@@ -6,7 +6,7 @@
   "preferredEvidenceSchema": 3,
   "source": {
     "repository": "sean-m-cooper/CodeTestament",
-    "revision": "75b0a2a1ea3d2ba078fa5f107c17fed7cd17850b"
+    "revision": "91d6773092e2f5fc6c6e4c25de7a12d62017f7e7"
   },
   "analyzers": {
     "dotnet": {
@@ -43,21 +43,22 @@
     },
     "javascript-typescript": {
       "package": "codetestament",
-      "preferredVersion": "0.5.2",
+      "preferredVersion": "0.6.0",
       "testedVersions": [
         "0.5.1",
         "0.6.0-preview.3",
         "0.5.2",
-        "0.6.0-preview.4"
+        "0.6.0-preview.4",
+        "0.6.0"
       ],
-      "sourceRevision": "05de4bf7a370d59c2c17323778a7c3358754b223"
+      "sourceRevision": "91d6773092e2f5fc6c6e4c25de7a12d62017f7e7"
     }
   },
-  "evidenceToolVersion": "0.6.0-preview.4",
+  "evidenceToolVersion": "0.6.0",
   "defaults": {
-    "npm": "codetestament@0.6.0-preview.4",
+    "npm": "codetestament@0.6.0",
     "dotnet": "CodeTestament.Scorecard@2.4.3",
-    "javascript-typescript": "codetestament@0.5.2"
+    "javascript-typescript": "codetestament@0.6.0"
   },
   "installations": {
     "npm": [
@@ -235,6 +236,28 @@
           "javascript-typescript": {
             "name": "CodeTestament.JavaScript",
             "version": "0.6.0-preview.4"
+          },
+          "python": {
+            "name": "CodeTestament.Python",
+            "version": "0.15.0"
+          }
+        },
+        "requiresLocalPackage": false,
+        "expectedNameOption": true,
+        "supportsDependencyMetadata": true
+      },
+      {
+        "package": "codetestament",
+        "version": "0.6.0",
+        "commands": {
+          "javascript-typescript": "codetestament",
+          "evidence": "codetestament-evidence",
+          "python": "codetestament-python"
+        },
+        "tools": {
+          "javascript-typescript": {
+            "name": "CodeTestament.JavaScript",
+            "version": "0.6.0"
           },
           "python": {
             "name": "CodeTestament.Python",
