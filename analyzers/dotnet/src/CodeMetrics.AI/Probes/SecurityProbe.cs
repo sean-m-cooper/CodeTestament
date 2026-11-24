@@ -34,7 +34,7 @@ public static class SecurityProbe
                 var filePath = tree.FilePath;
 
                 AnalyzeHardcodedSecrets(root, compilation.GetSemanticModel(tree), filePath, projectName, findings);
-                AnalyzeRawSqlInterpolation(root, filePath, projectName, findings);
+                AnalyzeRawSqlInterpolation(root, compilation.GetSemanticModel(tree), filePath, projectName, findings);
                 AnalyzeUnsafeDeserialization(root, filePath, projectName, findings);
                 AnalyzeAllowAnyOriginWithCredentials(root, compilation.GetSemanticModel(tree), filePath, projectName, findings);
                 AnalyzeAllowAnonymous(root, compilation.GetSemanticModel(tree), filePath, projectName, findings);
@@ -162,7 +162,7 @@ public static class SecurityProbe
     // ── Finding 2: Raw SQL Interpolation ─────────────────────────────────────
 
     private static void AnalyzeRawSqlInterpolation(
-        SyntaxNode root, string filePath, string projectName, List<Finding> findings)
+        SyntaxNode root, SemanticModel model, string filePath, string projectName, List<Finding> findings)
     {
         var invocations = root.DescendantNodes().OfType<InvocationExpressionSyntax>();
 
@@ -174,7 +174,7 @@ public static class SecurityProbe
                 methodName.IndexOf("Sql", StringComparison.OrdinalIgnoreCase) < 0)
                 continue;
 
-            foreach (var arg in inv.ArgumentList.Arguments)
+            foreach (var arg in EfCoreSqlRecognition.SqlTextArguments(inv, model))
             {
                 var expr = arg.Expression;
                 if (expr is InterpolatedStringExpressionSyntax ||

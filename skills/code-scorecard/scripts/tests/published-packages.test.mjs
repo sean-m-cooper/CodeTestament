@@ -12,7 +12,7 @@ test('published defaults install into empty caches and validate all three ecosys
   skip: !destination, timeout: 300_000,
 }, () => {
   assert.deepEqual(compatibility.defaults, {
-    'javascript-typescript': 'codetestament@0.5.2', npm: 'codetestament@0.6.0-preview.4', dotnet: 'CodeTestament.Scorecard@2.4.2',
+    'javascript-typescript': 'codetestament@0.5.2', npm: 'codetestament@0.6.0-preview.4', dotnet: 'CodeTestament.Scorecard@2.4.3',
   });
   const output = path.resolve(destination);
   assert.ok(!fs.existsSync(output), 'Release verification requires a new output directory.');
@@ -21,8 +21,25 @@ test('published defaults install into empty caches and validate all three ecosys
     const file = path.join(root, relative); fs.mkdirSync(path.dirname(file), { recursive: true });
     fs.writeFileSync(file, value);
   };
-  write('app/App.csproj', '<Project Sdk="Microsoft.NET.Sdk"><PropertyGroup><TargetFramework>net10.0</TargetFramework></PropertyGroup></Project>');
+  write('app/App.csproj', '<Project Sdk="Microsoft.NET.Sdk"><PropertyGroup><TargetFramework>net10.0</TargetFramework></PropertyGroup><ItemGroup><PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="10.0.15" /></ItemGroup></Project>');
   write('app/Work.cs', 'public class Work { public int Run(int value) => value > 0 ? value : 0; }');
+  write('app/SqlCalls.cs', `using System.Threading;
+using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
+public class Photo { public int Id { get; set; } public Photo Parent { get; set; } }
+public class ParameterizedSql {
+    public async Task Run(DbContext db, string id, CancellationToken ct) {
+        await db.Set<Photo>().FromSqlInterpolated($"SELECT * FROM Photos WITH (UPDLOCK, HOLDLOCK) WHERE Id = {id}")
+            .IgnoreQueryFilters().Include(p => p.Parent).FirstOrDefaultAsync(ct);
+        await db.Database.ExecuteSqlInterpolatedAsync($"UPDATE Photos SET Id = {id}", ct);
+        db.Database.ExecuteSqlRaw("DELETE FROM Photos WHERE Name = {0}", $"prefix-{id}");
+    }
+}
+public class UnsafeSql {
+    public void Run(DbContext db, string id) {
+        db.Database.ExecuteSqlRaw($"DELETE FROM Photos WHERE Id = {id}");
+    }
+}`);
   write('app/Identifiers.cs', `public class Identifiers {
     private const string PaymentCardTokenRecordType = "paymentcardtoken";
     public string Settings() {
@@ -59,7 +76,7 @@ test('published defaults install into empty caches and validate all three ecosys
   const result = JSON.parse(child.stdout);
   assert.equal(result.results.length, 3);
   assert.equal(new Set(result.results.map(run => run.runId)).size, 3);
-  const expected = { dotnet: ['CodeTestament.Scorecard', '2.4.2'],
+  const expected = { dotnet: ['CodeTestament.Scorecard', '2.4.3'],
     'javascript-typescript': ['CodeTestament.JavaScript', '0.5.2'], python: ['CodeTestament.Python', '0.15.0'] };
   for (const run of result.results) {
     assert.equal(run.status, 'complete'); assert.equal(run.fresh, true);
@@ -75,7 +92,7 @@ test('published defaults install into empty caches and validate all three ecosys
     if (run.ecosystem === 'dotnet') {
       assert.equal(run.ruleCatalog.status, 'available');
       const catalog = JSON.parse(fs.readFileSync(run.artifacts.ruleCatalog, 'utf8'));
-      assert.equal(catalog.tool.name, 'CodeTestament.Scorecard'); assert.equal(catalog.tool.version, '2.4.2');
+      assert.equal(catalog.tool.name, 'CodeTestament.Scorecard'); assert.equal(catalog.tool.version, '2.4.3');
       assert.ok(catalog.rules.some(rule => rule.code === 'CMAI5001'));
       const secretRule = catalog.rules.find(rule => rule.code === 'CMAI4001');
       assert.equal(secretRule.annotation.supported, true);
@@ -83,6 +100,10 @@ test('published defaults install into empty caches and validate all three ecosys
       const secrets = evidence.dimensions.security.findings.filter(finding => finding.category === 'hardcodedSecret');
       assert.equal(secrets.length, 1, 'Only the synthetic credential control should remain.');
       assert.match(secrets[0].message, /ApiKey/);
+      const sql = evidence.dimensions.security.findings.filter(finding => finding.category === 'rawSqlInterpolation');
+      assert.equal(sql.length, 1, 'Parameterized EF calls and separate parameter values must not be SQL findings.');
+      assert.equal(sql[0].type, 'UnsafeSql');
+      assert.match(sql[0].message, /ExecuteSqlRaw/);
     } else {
       const installed = JSON.parse(fs.readFileSync(path.join(run.tooling.analyzer.cache, 'node_modules/codetestament/package.json'), 'utf8'));
       assert.equal(installed.name, 'codetestament'); assert.equal(installed.version, run.ecosystem === 'python' ? '0.6.0-preview.4' : '0.5.2');
