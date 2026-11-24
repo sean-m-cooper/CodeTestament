@@ -27,6 +27,25 @@ SARIF 2.1.0 export includes stable rule IDs, fingerprints, relative locations, o
 
 Do not average ecosystem scores. JS/TS scores are uncalibrated across ecosystems, and its implemented dimensions have a narrower scope than .NET. See `shared/scorecard-schema/migration-v3.md` for consumer migration and missing-signal handling.
 
+## Portable JS/TS configuration (development)
+
+The development analyzer excludes the checkout's absolute location from configuration
+identity. Compiler paths equal to the repository root become `<root>`; paths beneath
+it become `<root>/relative/path`. This includes TypeScript's resolved `baseUrl`,
+`rootDir`, `rootDirs` and `pathsBasePath`, including inherited workspace settings.
+The absolute `subject.root` remains provenance for locating files and exporting SARIF;
+it is not part of the configuration fingerprint.
+
+Compiler-option changes, source-selection changes and different external paths still
+change the fingerprint. Tool identity/version, ruleset, entry point and scope checks
+remain enforced. Moving an otherwise equivalent checkout does not disable any gate.
+
+Older JS/TS evidence could hash an absolute path when a compiler option resolved to
+the repository root itself. Those stored hashes cannot be reliably repaired from
+the evidence alone. Regenerate the baseline from its original source revision and
+the current run with the same corrected analyzer version and settings. Do not edit
+historical hashes or use `--allow-incompatible` to manufacture a passing gate.
+
 ## Skill and other evidence consumers
 
 The `code-scorecard` skill in `ai_tools` is a version-aware consumer. Keep thresholds and schemas here; downstream consumers pin tested package versions and use the packaged validator. Generate a fresh run by default, validate both process exit and evidence provenance, and expose scope alongside every score. Never promote partial CSV into a replacement score after a failed analysis.
