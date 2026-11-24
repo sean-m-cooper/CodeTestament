@@ -30,7 +30,7 @@ jobs:
       - run: npm test
       - run: npm run test:package
       - run: npm run test:architecture
-      - name: Verify Python preview before publication
+      - name: Verify bundled Python before publication
         run: |
           python -m unittest discover -s ../python/tests -v
           node --test ../../shared/source-facts/conformance.test.mjs ../python/tests/calibration-policy.test.mjs
@@ -45,7 +45,7 @@ jobs:
           fi
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-  preview-channel:
+  published-channel:
     # Also dispatchable to verify registry processing without publishing or changing tags.
     needs: publish
     if: always() && (needs.publish.result == 'success' || github.event_name == 'workflow_dispatch')
@@ -55,14 +55,15 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Verify published preview tag
+      - name: Verify published version and channel
         working-directory: analyzers/javascript-typescript
         shell: bash
         run: |
           package=$(node -p 'require("./package.json").name')
           version=$(node -p 'require("./package.json").version')
           test "$package" = codetestament
-          [[ "$version" == *-* ]] || exit 0
+          channel=latest
+          if [[ "$version" == *-* ]]; then channel=preview; fi
           for attempt in {1..24}; do
             actual=$(npm view "$package@$version" version --registry=https://registry.npmjs.org 2>/dev/null || true)
             if [[ "$actual" == "$version" ]]; then break; fi
@@ -72,11 +73,11 @@ jobs:
           # npm may assign latest to a package's first preview; only verify the requested channel.
           for attempt in {1..24}; do
             tags=$(npm view "$package" dist-tags --json --registry=https://registry.npmjs.org)
-            if printf '%s' "$tags" | node -e 'const t=JSON.parse(require("fs").readFileSync(0,"utf8")); process.exit(t.preview === process.argv[1] ? 0 : 1)' "$version"; then
+            if printf '%s' "$tags" | node -e 'const t=JSON.parse(require("fs").readFileSync(0,"utf8")); process.exit(t[process.argv[2]] === process.argv[1] ? 0 : 1)' "$version" "$channel"; then
               printf '%s\n' "$tags"
               exit 0
             fi
             sleep 5
           done
-          echo "Published preview tag did not resolve to $version." >&2
+          echo "Published $channel tag did not resolve to $version." >&2
           exit 1
