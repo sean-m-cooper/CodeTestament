@@ -47,3 +47,26 @@ Local artifacts: `TestResults/corpus/*-final.json`,
 `TestResults/calibration/final.json`, `skill-integration-final.log`,
 `migration-validation-final.log` and `plugin-validation.log`.
 They are generated validation outputs, not source-controlled fixtures.
+
+## Published release verification
+
+- Release commit: `791d564e55e07daa1fede0cd286055bee22493e5`, tag `js-v0.7.0`.
+- [CI](https://github.com/sean-m-cooper/CodeTestament/actions/runs/45494147567)
+  and [Windows/Linux skill integration](https://github.com/sean-m-cooper/CodeTestament/actions/runs/45494147414)
+  passed before merging. Node 20/22 and the Python coverage-version matrix passed.
+- [npm publication and channel verification](https://github.com/sean-m-cooper/CodeTestament/actions/runs/45495151129)
+  succeeded. Public npm `latest` resolves to `0.7.0`; `preview` remains `0.6.0-preview.4`.
+- A fresh registry install through the proposed plugin defaults produced a usable
+  nine-score JS/TS report, validated .NET 2.4.3 and Python 0.15.0, and passed a
+  relocated-worktree baseline comparison. Audit: `5484972e-a470-4733-8c00-da926420812b`.
+- The separate Python registry fixture passed, retaining exactly two scores,
+  Async/Blocking Usage 8 and unscored Error Handling. Its first attempt preceded
+  registry propagation and returned ETARGET; a new download cache passed once
+  0.7.0 became available. No analyzer changes were needed.
+- Registry artifact integrity:
+  `sha512-cZrkIodCVvmyKKzyWNNzpGNt0NtKdcJ6aG0gfmkBvouxxTTzguhNL/z3ng89fwa1LkRiOi+/p1dMGgvHG7rX9Q==`.
+
+Receipts: `TestResults/published-070/verified.json`,
+`TestResults/published-python-070-final/package-provenance.json` and
+`published-python-070-final.log`. Plugin 0.4.0 promotes these verified defaults;
+the analyzer artifact itself does not change during that promotion.

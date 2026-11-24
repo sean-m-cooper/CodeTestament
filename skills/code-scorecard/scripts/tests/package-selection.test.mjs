@@ -16,7 +16,7 @@ test('published CodeTestament defaults agree with compatibility metadata', () =>
     assert.equal(record.tools[ecosystem].version, compatibility.analyzers[ecosystem].preferredVersion);
     assert.equal(record.requiresLocalPackage, false);
   }
-  assert.deepEqual(compatibility.installations.npm.filter(record => record.package === "codetestament" && record.requiresLocalPackage).map(record => record.version), ["0.7.0"]);
+  assert.deepEqual(compatibility.installations.npm.filter(record => record.package === "codetestament" && record.requiresLocalPackage).map(record => record.version), []);
 });
 
 test('selects exact package records and rejects ambiguous or conflicting repository pins', t => {
@@ -27,7 +27,7 @@ test('selects exact package records and rejects ambiguous or conflicting reposit
   const select = options => selectInstallation(root, file, 'javascript-typescript', options ?? {}, compatibility);
   write({ name: 'app' });
   assert.equal(select().package, 'codetestament');
-  assert.equal(select().version, '0.6.0');
+  assert.equal(select().version, '0.7.0');
   assert.equal(select({ 'dependency-metadata': true }).record.supportsDependencyMetadata, true);
   assert.throws(() => select({ 'npm-tool': 'codetestament@0.5.2', 'dependency-metadata': true }), /0.5.2 does not support --dependency-metadata/);
   assert.equal(select({ 'npm-tool': 'codetestament@0.6.0-preview.3', 'dependency-metadata': true }).version, '0.6.0-preview.3');

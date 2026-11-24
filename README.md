@@ -33,7 +33,7 @@ The .NET and JS/TS command-line analyzers write these files by default. Python e
 | `.scorecard/<ecosystem>/evidence.json` | Scored evidence across stable quality dimensions |
 
 > **CodeTestament packages are published.** NuGet `CodeTestament.Scorecard@2.4.3`
-> is the .NET default. JS/TS and Python use `codetestament@0.6.0`. See the
+> is the .NET default. JS/TS and Python use `codetestament@0.7.0`. See the
 > [migration guide](docs/codetestament-migration.md) for installation and baseline compatibility.
 
 ## Agent skill
@@ -53,8 +53,8 @@ remain honored; unpinned runs use the verified CodeTestament packages.
 | Ecosystem | Location | Package | Status |
 |-----------|----------|---------|--------|
 | .NET / C# | `analyzers/dotnet` | `CodeTestament.Scorecard@2.4.3` NuGet global tool | Available |
-| JavaScript / TypeScript / React | `analyzers/javascript-typescript` | `codetestament@0.6.0` npm package | Implemented; scores uncalibrated |
-| Python | `analyzers/python` | `codetestament-python` in `codetestament@0.6.0`; Python 3.12 required | Partial assessment: Method Complexity and Async/Blocking Usage scoring; other evidence unscored |
+| JavaScript / TypeScript / React | `analyzers/javascript-typescript` | `codetestament@0.7.0` npm package | Nine scoped dimensions; scores uncalibrated |
+| Python | `analyzers/python` | `codetestament-python` in `codetestament@0.7.0`; Python 3.12 required | Partial assessment: Method Complexity and Async/Blocking Usage scoring; other evidence unscored |
 | Rust | `analyzers/rust` | Rust crate | Planned next wave |
 
 ## Shared Contract
@@ -101,7 +101,7 @@ for exact placement, supported spellings, and scoring effects.
 ## JavaScript / TypeScript Usage
 
 ```bash
-npm exec --yes --package=codetestament@0.6.0 -- codetestament
+npm exec --yes --package=codetestament@0.7.0 -- codetestament
 ```
 
 The JS/TS analyzer implements source metrics, function-based complexity and maintainability, React hook/effect checks and bounded standard-Promise/Array callback checks. Its module dependency graph reports resolution coverage, type-only references, cycles and fan-in/out as unscored architecture evidence. Decomposition reports owned executable statements, and error-handling evidence resolves selected-source callback bodies without double-counting reuse. Architecture and decomposition remain unscored; the other unsupported dimensions remain unavailable. See its [README](analyzers/javascript-typescript/README.md) for scope and scoring policy, and the [0.4.0 release notes](docs/releases/javascript-typescript-0.4.0.md) for migration requirements.
@@ -116,11 +116,11 @@ Architecture and decomposition remain unscored.
 Requires Node.js 20+ and Python 3.12. Install the stable release without changing your project dependencies:
 
 ```sh
-npm exec --yes --package=codetestament@0.6.0 -- codetestament-python --project ./pyproject.toml --scorecard-output ./python-evidence.json
-npm exec --yes --package=codetestament@0.6.0 -- codetestament-evidence --input ./python-evidence.json --inspect-output ./python-inspection.json
+npm exec --yes --package=codetestament@0.7.0 -- codetestament-python --project ./pyproject.toml --scorecard-output ./python-evidence.json
+npm exec --yes --package=codetestament@0.7.0 -- codetestament-evidence --input ./python-evidence.json --inspect-output ./python-inspection.json
 ```
 
-Use new output filenames for each run. Python and JS/TS ship in the same stable package. See the [0.6.0 release notes](docs/releases/javascript-typescript-0.6.0.md) and [Python guide](analyzers/python/README.md) for source selection, score limits, and feedback guidance.
+Use new output filenames for each run. Python and JS/TS ship in the same stable package. See the [0.7.0 release notes](docs/releases/javascript-typescript-0.7.0.md) and [Python guide](analyzers/python/README.md) for source selection, score limits, and feedback guidance.
 
 ## Evidence and release verification
 

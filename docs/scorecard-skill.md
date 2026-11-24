@@ -53,9 +53,9 @@ compatibility checks. No automatic user configuration or cache migration occurs.
 
 ## Package and release contract
 
-The plugin's `0.3.0` version is independent of analyzer versions. The compatibility
+The plugin's `0.4.0` version is independent of analyzer versions. The compatibility
 manifest selects published `CodeTestament.Scorecard@2.4.3` for .NET,
-`codetestament@0.6.0` for JS/TS and Python. Clean-cache registry tests verify these defaults
+`codetestament@0.7.0` for JS/TS and Python. Clean-cache registry tests verify these defaults
 without local archives; existing supported exact repository pins remain honored. See [bootstrap](../skills/code-scorecard/bootstrap.md).
 Python provides a partial assessment with at most two scored dimensions; Error Handling
 remains unscored.

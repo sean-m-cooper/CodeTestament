@@ -6,7 +6,7 @@
   "preferredEvidenceSchema": 3,
   "source": {
     "repository": "sean-m-cooper/CodeTestament",
-    "revision": "91d6773092e2f5fc6c6e4c25de7a12d62017f7e7"
+    "revision": "791d564e55e07daa1fede0cd286055bee22493e5"
   },
   "analyzers": {
     "dotnet": {
@@ -43,7 +43,7 @@
     },
     "javascript-typescript": {
       "package": "codetestament",
-      "preferredVersion": "0.6.0",
+      "preferredVersion": "0.7.0",
       "testedVersions": [
         "0.5.1",
         "0.6.0-preview.3",
@@ -52,14 +52,14 @@
         "0.6.0",
         "0.7.0"
       ],
-      "sourceRevision": "91d6773092e2f5fc6c6e4c25de7a12d62017f7e7"
+      "sourceRevision": "791d564e55e07daa1fede0cd286055bee22493e5"
     }
   },
-  "evidenceToolVersion": "0.6.0",
+  "evidenceToolVersion": "0.7.0",
   "defaults": {
-    "npm": "codetestament@0.6.0",
+    "npm": "codetestament@0.7.0",
     "dotnet": "CodeTestament.Scorecard@2.4.3",
-    "javascript-typescript": "codetestament@0.6.0"
+    "javascript-typescript": "codetestament@0.7.0"
   },
   "installations": {
     "npm": [
@@ -287,7 +287,7 @@
             "version": "0.15.0"
           }
         },
-        "requiresLocalPackage": true,
+        "requiresLocalPackage": false,
         "expectedNameOption": true,
         "supportsDependencyMetadata": true
       }

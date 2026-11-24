@@ -11,7 +11,7 @@ The analyzer owns deterministic analysis, schemas, scores, comparison, gates and
 
 ## Generate evidence
 
-Published defaults are `codetestament@0.6.0` for JS/TS, `codetestament@0.6.0` for Python (adapter `0.15.0`), and `CodeTestament.Scorecard@2.4.3` for .NET. Follow [package selection and migration](bootstrap.md#package-selection-and-codetestament-migration) for exact repository pins, local archives, and historical imports. A new brand does not change scores or authorize rewriting baselines. CMAI codes and existing annotations remain valid.
+Published defaults are `codetestament@0.7.0` for JS/TS, `codetestament@0.7.0` for Python (adapter `0.15.0`), and `CodeTestament.Scorecard@2.4.3` for .NET. Follow [package selection and migration](bootstrap.md#package-selection-and-codetestament-migration) for exact repository pins, local archives, and historical imports. A new brand does not change scores or authorize rewriting baselines. CMAI codes and existing annotations remain valid.
 
 Use [bootstrap.md](bootstrap.md) and `scripts/run-scorecard.mjs`. The helper discovers nested entry points, honors compatible exact repository pins, installs isolated tested tools, generates fresh evidence and validates it with CodeTestament's packaged schemas. The supported schemas and tested versions live in [compatibility.json](compatibility.json). Never automatically upgrade to `latest` or change a repository pin.
 
