@@ -1,6 +1,6 @@
 # Code Scorecard
 
-The `code-scorecard` skill audits nine quality dimensions using CodeTestament's deterministic evidence (including supported legacy CodeMetrics.AI packages) and targeted qualitative review. It supports .NET solutions (`.sln` and `.slnx`), individual C# projects (`.csproj`), and JavaScript/TypeScript packages or workspaces (`package.json`).
+The `code-scorecard` skill audits nine quality dimensions using CodeTestament's deterministic evidence (including supported legacy CodeMetrics.AI packages) and targeted qualitative review. It supports .NET solutions (`.sln` and `.slnx`), individual C# projects (`.csproj`), and JavaScript/TypeScript packages or workspaces (`package.json`), and Python manifests (`pyproject.toml`), files or directories. Python is a partial assessment with at most Method Complexity and Async/Blocking Usage scored; Error Handling remains unscored.
 
 For installation, ownership and migration from the ai_tools bundle, see
 [skill installation and maintenance](scorecard-skill.md). This guide and the
@@ -14,13 +14,14 @@ Ask the agent to use the skill with a specific entry point:
 Use code-scorecard against MyApplication.sln --explain
 Use code-scorecard against MyApplication.slnx --stats
 Use code-scorecard against src/MyApi/MyApi.csproj --verbose
+Use code-scorecard against pyproject.toml
 ```
 
 Relative entry points are resolved against the audited repository. Quote paths containing spaces. When no entry point is supplied, the skill discovers nested solutions and packages, preferring a containing solution over individual projects. It asks you to select when several candidates remain.
 
 A solution run scores its production projects. A `.csproj` run scores only the selected project while loading referenced projects for semantic analysis. The .NET analyzer excludes source outside the entry point's directory. Findings are relative to the repository root recorded in the evidence.
 
-Install Node.js 20+ with npm for the shared evidence validator. .NET analysis also needs the .NET 10 SDK and any SDKs/workloads required by the target repository. Restore the chosen solution or project using the repository's normal procedure before the audit. The default configuration is `Release`; request another configuration explicitly when needed.
+Install Node.js 20+ with npm for the shared evidence validator. .NET analysis also needs the .NET 10 SDK and any SDKs/workloads required by the target repository. Restore the chosen solution or project using the repository's normal procedure before the audit. The default .NET configuration is `Release`; request another configuration explicitly when needed. Python analysis requires Python 3.12 and parses source without importing or executing the target.
 
 The skill installs tested tool versions in an isolated cache and honors compatible exact repository pins. It does not modify global installations, dependency manifests or build targets. See the [bootstrap guide](../skills/code-scorecard/bootstrap.md) for direct runner commands, tool versions, coverage input, optional dependency-probe skipping and troubleshooting.
 

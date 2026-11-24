@@ -7,7 +7,7 @@
     {
       "name": "codetestament",
       "source": "./",
-      "description": "Evidence-backed code scorecards for .NET, JavaScript/TypeScript, and the Python preview.",
+      "description": "Evidence-backed code scorecards for .NET, JavaScript/TypeScript, and Python.",
       "policy": {
         "installation": "AVAILABLE",
         "authentication": "ON_INSTALL"

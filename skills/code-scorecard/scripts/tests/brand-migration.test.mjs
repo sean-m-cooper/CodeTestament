@@ -27,7 +27,7 @@ test('legacy pins and CodeTestament packages integrate without sharing caches', 
   };
   const legacy = { 'npm-tool': 'codemetrics-ai@0.6.0-preview.2', 'dotnet-tool': 'CodeMetrics.AI@2.3.1',
     'npm-package': oldNpm, 'dotnet-package': oldNet, 'evidence-package': newNpm };
-  const modern = { 'npm-tool': 'codetestament@0.6.0-preview.4', 'dotnet-tool': 'CodeTestament.Scorecard@2.4.3', 'npm-package': newNpm, 'dotnet-package': newNet };
+  const modern = { 'npm-tool': 'codetestament@0.6.0', 'dotnet-tool': 'CodeTestament.Scorecard@2.4.3', 'npm-package': newNpm, 'dotnet-package': newNet };
   const success = (options, ...args) => {
     const result = invoke(options, ...args); assert.equal(result.code, 0, result.error + JSON.stringify(result.value));
     receipts.push(...result.value.results); return result.value.results[0];
@@ -56,7 +56,7 @@ test('legacy pins and CodeTestament packages integrate without sharing caches', 
       assert.ok(run.tooling.analyzer.archiveSha256);
       if (run.ecosystem === 'dotnet') { assert.equal(run.ruleCatalog.status, 'available'); assert.equal(readJson(run.artifacts.ruleCatalog).tool.name, names.dotnet); }
       if (run.ecosystem === 'python') {
-        assert.equal(run.packageVersion, '0.6.0-preview.4'); assert.equal(run.version, '0.15.0');
+        assert.equal(run.packageVersion, '0.6.0'); assert.equal(run.version, '0.15.0');
         assert.equal(evidence.dimensions.errorHandling.status, 'skipped'); assert.equal(evidence.dimensions.errorHandling.score, undefined);
       }
     }
@@ -68,7 +68,7 @@ test('legacy pins and CodeTestament packages integrate without sharing caches', 
     assert.equal(readJson(before.artifacts.evidence).tool.name, 'codemetrics-ai');
     assert.notEqual(before.tooling.analyzer.cache, after.tooling.analyzer.cache);
     assert.equal(fs.readFileSync(path.join(oldCache, 'preserve'), 'utf8'), 'legacy cache layout');
-    write('ui/package.json', JSON.stringify({ name: 'ui', devDependencies: { codetestament: '0.6.0-preview.4' } }));
+    write('ui/package.json', JSON.stringify({ name: 'ui', devDependencies: { codetestament: '0.6.0' } }));
     const pinned = success({ 'npm-package': newNpm }, '--entry-point', 'ui/package.json');
     assert.equal(pinned.source, 'repository-pin'); assert.equal(pinned.recordedTool.name, 'CodeTestament.JavaScript');
     const conflict = invoke(modern, '--entry-point', 'ui/package.json', '--npm-tool', 'codemetrics-ai@0.6.0-preview.2');
@@ -125,7 +125,7 @@ test('legacy pins and CodeTestament packages integrate without sharing caches', 
     write('ui/package.json', JSON.stringify({ name: 'ui', devDependencies: { 'codemetrics-ai': '0.2.0' } }));
     const run = success({ 'npm-package': archive, 'evidence-package': newNpm }, '--entry-point', 'ui/package.json');
     assert.equal(run.recordedTool.version, '0.2.0'); assert.equal(run.tooling.analyzer.version, '0.2.0');
-    assert.equal(run.tooling.evidence.version, '0.6.0-preview.4');
+    assert.equal(run.tooling.evidence.version, '0.6.0');
     write('ui/package.json', '{"name":"ui"}');
   });
   if (process.env.SCORECARD_MIGRATION_RECEIPT) fs.writeFileSync(process.env.SCORECARD_MIGRATION_RECEIPT,

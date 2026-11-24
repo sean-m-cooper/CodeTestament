@@ -94,7 +94,7 @@ export async function execute(options) {
           if (options.coverage) args.push('--coverage', path.resolve(root, options.coverage));
           summary.analyzerExitCode = await run(tooling.dotnet, args, root, {}, timeoutSeconds * 1000);
         } else if (scope.ecosystem === 'python') {
-          if (!fs.existsSync(tooling.python)) throw new Error('The selected npm package does not contain its tested Python command. Use a supported Python preview package.');
+          if (!fs.existsSync(tooling.python)) throw new Error('The selected npm package does not contain its tested Python command. Use a supported package containing Python.');
           args.push('--project', scope.entryPoint);
           if (options.python) args.push('--python', path.resolve(root, options.python));
           for (const flag of ['coverage-json', 'collection-manifest'])

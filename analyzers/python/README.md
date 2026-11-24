@@ -1,12 +1,12 @@
 # CodeTestament Python Analyzer
 
-> Published preview: `codetestament@0.6.0-preview.3`. Use this exact version;
+> Stable release: `codetestament@0.6.0`. Use this exact version;
 > existing CodeMetrics.AI/codemetrics-ai installations remain supported.
 > See the [migration guide](../../docs/codetestament-migration.md).
 
-Preview source analyzer for Python 3.12, using only the standard library. It parses files without importing or executing the target project. No package installation or target build is required.
+Source analyzer for Python 3.12, using only the standard library. It parses files without importing or executing the target project. No package installation or target build is required.
 
-This is **not a full Python scorecard**. The packaged `codetestament-python` CLI now wraps function-complexity [source facts](../../shared/source-facts/README.md) in standard scorecard evidence v3. Method Complexity uses the accepted [complexity policy](METHOD_COMPLEXITY.md); adapter 0.15.0 also scores [Async/Blocking Usage](ASYNC_SCORING.md) when production async implementations exist. The other seven dimensions remain unavailable, including Error Handling. There is no CSV. Any aggregate is a partial assessment with the actual number of scored dimensions: at most 2/9, or 1/9 for synchronous-only code. The canonical code-scorecard skill uses the published CodeTestament preview by default, while honoring supported legacy pins.
+This is **not a full Python scorecard**. The packaged `codetestament-python` CLI now wraps function-complexity [source facts](../../shared/source-facts/README.md) in standard scorecard evidence v3. Method Complexity uses the accepted [complexity policy](METHOD_COMPLEXITY.md); adapter 0.15.0 also scores [Async/Blocking Usage](ASYNC_SCORING.md) when production async implementations exist. The other seven dimensions remain unavailable, including Error Handling. There is no CSV. Any aggregate is a partial assessment with the actual number of scored dimensions: at most 2/9, or 1/9 for synchronous-only code. The canonical code-scorecard skill uses the published stable CodeTestament package by default, while honoring supported legacy pins.
 
 ## Packaged evidence workflow
 
@@ -19,11 +19,11 @@ The standalone [behavior reviewers](BEHAVIOR_REVIEW.md) add bounded handler disp
 
 The standalone [handler-continuation extension](ERROR_HANDLING_CONTINUATIONS.md) follows explicit returns/raises after enclosing branches and links narrowly retained defaults. It preserves the original disposition evidence and remains unscored. Packaged async scoring is a separate extension.
 
-The published `codetestament` package bundles the Python scripts, shared population engine, and canonical evidence validator. This delivery does not create a separate PyPI distribution. The canonical package independently recomputes the standalone async owner-rate arithmetic. Node.js 20+ and Python 3.12 are required. The published preview is version `codetestament@0.6.0-preview.3`, with Python adapter version `0.15.0`. The existing stable `codemetrics-ai@0.5.0` does not contain Python support. There is no separate PyPI package.
+The published `codetestament` package bundles the Python scripts, shared population engine, and canonical evidence validator. This delivery does not create a separate PyPI distribution. The canonical package independently recomputes the standalone async owner-rate arithmetic. Node.js 20+ and Python 3.12 are required. The stable package is version `codetestament@0.6.0`, with Python adapter version `0.15.0`. The existing stable `codemetrics-ai@0.5.0` does not contain Python support. There is no separate PyPI package.
 
 ```powershell
-npm exec --yes --package=codetestament@0.6.0-preview.3 -- codetestament-python --project E:/repos/my-python-project/pyproject.toml --scorecard-output evidence.json
-npm exec --yes --package=codetestament@0.6.0-preview.3 -- codetestament-evidence --input evidence.json --inspect-output inspection.json
+npm exec --yes --package=codetestament@0.6.0 -- codetestament-python --project E:/repos/my-python-project/pyproject.toml --scorecard-output evidence.json
+npm exec --yes --package=codetestament@0.6.0 -- codetestament-evidence --input evidence.json --inspect-output inspection.json
 ```
 
 For repository development, invoke `node analyzers/javascript-typescript/dist/python-cli.js` after `npm run build --prefix analyzers/javascript-typescript`. Entry points can be directories, `pyproject.toml`, `.py`, or `.pyi` files. A manifest selects its directory without executing or interpreting build configuration. Paths in findings are relative to the selected directory, or a selected file's parent. Windows uses `py -3.12`; other platforms use `python3`. Pass `--python` with an absolute Python 3.12 executable path to override. The interpreter runs isolated from project startup hooks and imports only the packaged analyzer and standard library. Target code is never imported or executed.

@@ -9,7 +9,7 @@ import { compatibility } from '../run-scorecard.mjs';
 // Explicit release verification: downloads the exact published npm pin into a new cache.
 // Retain all output for the subsequent generated-report evaluation.
 const destination = process.env.SCORECARD_PUBLISHED_PYTHON_OUTPUT;
-test('published Python preview installs from an empty cache and preserves scoring boundaries', {
+test('published Python support installs from an empty cache and preserves scoring boundaries', {
   skip: !destination, timeout: 180_000,
 }, () => {
   const output = path.resolve(destination);
@@ -17,7 +17,7 @@ test('published Python preview installs from an empty cache and preserves scorin
   fs.mkdirSync(output, { recursive: true });
   const root = path.join(output, 'source'), cache = path.join(output, 'cache');
   fs.mkdirSync(root);
-  fs.writeFileSync(path.join(root, 'pyproject.toml'), '[project]\nname="python-preview-smoke"\nversion="0.0.0"\n');
+  fs.writeFileSync(path.join(root, 'pyproject.toml'), '[project]\nname="python-release-smoke"\nversion="0.0.0"\n');
   const source = `import asyncio
 import time
 def wait():
