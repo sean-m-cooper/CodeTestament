@@ -18,7 +18,7 @@
         "2.4.1",
         "2.4.0"
       ],
-      "sourceRevision": "5bff94c5dd2eae440eeb46160a31c861e1ad2990"
+      "sourceRevision": "af0f820ebe91c2fcb543c7a3a9f665c5adac2e8f"
     },
     "python": {
       "package": "codetestament (bundled codetestament-python)",
