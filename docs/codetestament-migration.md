@@ -1,9 +1,9 @@
 # Moving to CodeTestament
 
 CodeMetrics.AI is becoming **CodeTestament**, with **CodeTestament Scorecard** as
-the assessment product. NuGet `CodeTestament.Scorecard@2.4.2`, stable npm `codetestament@0.5.1`, and preview npm
-`codetestament@0.6.0-preview.3` are published. GitHub is now
-`sean-m-cooper/CodeTestament`, and plugin 0.2.3 selects these exact defaults.
+the assessment product. NuGet `CodeTestament.Scorecard@2.4.2`, stable npm `codetestament@0.5.2`, and preview npm
+`codetestament@0.6.0-preview.4` are published. GitHub is now
+`sean-m-cooper/CodeTestament`, and plugin 0.2.4 selects these exact defaults.
 Supported legacy repository pins remain honored.
 
 The [local validation checkpoint](codetestament-migration-validation.md) records
@@ -14,8 +14,8 @@ executed tests, paired artifact hashes and remaining release checks.
 | Distribution | Version | Commands |
 | --- | --- | --- |
 | NuGet `CodeTestament.Scorecard` | `2.4.2` | `codetestament-dotnet` |
-| npm `codetestament` (stable JS/TS) | `0.5.1` | `codetestament`, `codetestament-evidence` |
-| npm `codetestament` (preview) | `0.6.0-preview.3` | `codetestament`, `codetestament-evidence`, `codetestament-python`, `codetestament-python-collect` |
+| npm `codetestament` (stable JS/TS) | `0.5.2` | `codetestament`, `codetestament-evidence` |
+| npm `codetestament` (preview) | `0.6.0-preview.4` | `codetestament`, `codetestament-evidence`, `codetestament-python`, `codetestament-python-collect` |
 
 The npm default command still analyzes JS/TS. Python remains preview, with at
 most Method Complexity and Async/Blocking Usage scored (2/9 dimensions). Error
@@ -30,8 +30,8 @@ Install the preview explicitly for Python or the JS/TS dependency metadata probe
 
 ```sh
 dotnet tool install --global CodeTestament.Scorecard --version 2.4.2
-npm exec --yes --package=codetestament@0.5.1 -- codetestament --help
-npm exec --yes --package=codetestament@0.6.0-preview.3 -- codetestament-python --help
+npm exec --yes --package=codetestament@0.5.2 -- codetestament --help
+npm exec --yes --package=codetestament@0.6.0-preview.4 -- codetestament-python --help
 ```
 
 The new commands coexist with legacy installations. The npm package is a preview;
@@ -53,7 +53,7 @@ Pop-Location
 dotnet tool install CodeTestament.Scorecard --version 2.4.2 --tool-path ./TestResults/codetestament-tools --add-source ./TestResults/brand-migration/current
 ./TestResults/codetestament-tools/codetestament-dotnet --help
 
-npm install --prefix ./TestResults/codetestament-npm --ignore-scripts --no-audit --no-fund ./TestResults/brand-migration/current/codetestament-0.6.0-preview.3.tgz
+npm install --prefix ./TestResults/codetestament-npm --ignore-scripts --no-audit --no-fund ./TestResults/brand-migration/current/codetestament-0.6.0-preview.4.tgz
 ./TestResults/codetestament-npm/node_modules/.bin/codetestament --help
 ./TestResults/codetestament-npm/node_modules/.bin/codetestament-python --help
 ```
@@ -94,7 +94,7 @@ CodeTestament tag `v2.4.0`. Build those revisions in separate checkouts. Version
 parity candidate. Retain the exact archives and use a fresh output directory on each run:
 
 ```powershell
-node scripts/verify-brand-migration.mjs --legacy-npm TestResults/brand-migration/legacy/codemetrics-ai-0.6.0-preview.2.tgz --current-npm TestResults/brand-migration/current/codetestament-0.6.0-preview.3.tgz --legacy-nuget TestResults/brand-migration/legacy/CodeMetrics.AI.2.3.1.nupkg --current-nuget TestResults/brand-migration/current/CodeTestament.Scorecard.2.4.0.nupkg
+node scripts/verify-brand-migration.mjs --legacy-npm TestResults/brand-migration/legacy/codemetrics-ai-0.6.0-preview.2.tgz --current-npm TestResults/brand-migration/current/codetestament-0.6.0-preview.4.tgz --legacy-nuget TestResults/brand-migration/legacy/CodeMetrics.AI.2.3.1.nupkg --current-nuget TestResults/brand-migration/current/CodeTestament.Scorecard.2.4.0.nupkg
 ```
 
 The verifier installs both names together, checks command shims and package

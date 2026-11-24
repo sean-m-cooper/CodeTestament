@@ -12,7 +12,7 @@ test('published defaults install into empty caches and validate all three ecosys
   skip: !destination, timeout: 300_000,
 }, () => {
   assert.deepEqual(compatibility.defaults, {
-    'javascript-typescript': 'codetestament@0.5.1', npm: 'codetestament@0.6.0-preview.3', dotnet: 'CodeTestament.Scorecard@2.4.2',
+    'javascript-typescript': 'codetestament@0.5.2', npm: 'codetestament@0.6.0-preview.4', dotnet: 'CodeTestament.Scorecard@2.4.2',
   });
   const output = path.resolve(destination);
   assert.ok(!fs.existsSync(output), 'Release verification requires a new output directory.');
@@ -33,6 +33,7 @@ test('published defaults install into empty caches and validate all three ecosys
     private const string ApiKey = "syntheticCredentialValue1234";
   }`);
   write('ui/package.json', '{"name":"registry-fixture","private":true}');
+  write('ui/tsconfig.json', '{"compilerOptions":{"baseUrl":".","rootDir":"."}}');
   write('ui/work.ts', 'export function choose(value: number) { return value > 0 ? value : 0; }');
   write('python/pyproject.toml', '[project]\nname="registry-fixture"\nversion="0.0.0"\n');
   write('python/work.py', 'import time\nasync def work():\n    time.sleep(1)\n');
@@ -56,7 +57,7 @@ test('published defaults install into empty caches and validate all three ecosys
   assert.equal(result.results.length, 3);
   assert.equal(new Set(result.results.map(run => run.runId)).size, 3);
   const expected = { dotnet: ['CodeTestament.Scorecard', '2.4.2'],
-    'javascript-typescript': ['CodeTestament.JavaScript', '0.5.1'], python: ['CodeTestament.Python', '0.15.0'] };
+    'javascript-typescript': ['CodeTestament.JavaScript', '0.5.2'], python: ['CodeTestament.Python', '0.15.0'] };
   for (const run of result.results) {
     assert.equal(run.status, 'complete'); assert.equal(run.fresh, true);
     assert.equal(run.source, 'compatibility-manifest');
@@ -81,7 +82,7 @@ test('published defaults install into empty caches and validate all three ecosys
       assert.match(secrets[0].message, /ApiKey/);
     } else {
       const installed = JSON.parse(fs.readFileSync(path.join(run.tooling.analyzer.cache, 'node_modules/codetestament/package.json'), 'utf8'));
-      assert.equal(installed.name, 'codetestament'); assert.equal(installed.version, run.ecosystem === 'python' ? '0.6.0-preview.3' : '0.5.1');
+      assert.equal(installed.name, 'codetestament'); assert.equal(installed.version, run.ecosystem === 'python' ? '0.6.0-preview.4' : '0.5.2');
       const lock = JSON.parse(fs.readFileSync(path.join(run.tooling.analyzer.cache, 'package-lock.json'), 'utf8'));
       const provenance = lock.packages['node_modules/codetestament'];
       assert.match(provenance.resolved, /^https:\/\/registry\.npmjs\.org\/codetestament\/-\//);
@@ -93,6 +94,18 @@ test('published defaults install into empty caches and validate all three ecosys
       }
     }
   }
+  const baseline = result.results.find(run => run.ecosystem === 'javascript-typescript');
+  const relocated = path.join(output, 'other-worktree'); fs.mkdirSync(path.join(relocated, 'ui'), { recursive: true });
+  for (const file of ['package.json', 'tsconfig.json', 'work.ts'])
+    fs.copyFileSync(path.join(root, 'ui', file), path.join(relocated, 'ui', file));
+  const moved = invoke(process.execPath, [runner, '--repo', relocated, '--entry-point', 'ui/package.json', '--cache', cache,
+    '--baseline', baseline.artifacts.evidence, '--fail-on-new', 'warning', '--max-score-drop', '0']);
+  assert.equal(moved.status, 0, moved.stderr + moved.stdout);
+  const movedRun = JSON.parse(moved.stdout).results[0];
+  const comparison = JSON.parse(fs.readFileSync(movedRun.artifacts.comparison, 'utf8'));
+  assert.equal(comparison.compatible, true);
+  assert.equal(movedRun.comparisonExitCode, 0);
+  fs.writeFileSync(path.join(output, 'portable-baseline.json'), moved.stdout);
   fs.writeFileSync(path.join(output, 'verified.json'), JSON.stringify({
     defaults: compatibility.defaults, source: compatibility.source,
     auditId: result.auditId, runs: result.results, status: 'passed',

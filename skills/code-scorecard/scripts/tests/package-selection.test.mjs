@@ -27,8 +27,8 @@ test('selects exact package records and rejects ambiguous or conflicting reposit
   const select = options => selectInstallation(root, file, 'javascript-typescript', options ?? {}, compatibility);
   write({ name: 'app' });
   assert.equal(select().package, 'codetestament');
-  assert.equal(select().version, '0.5.1');
-  assert.throws(() => select({ 'dependency-metadata': true }), /0.5.1 does not support --dependency-metadata/);
+  assert.equal(select().version, '0.5.2');
+  assert.throws(() => select({ 'dependency-metadata': true }), /0.5.2 does not support --dependency-metadata/);
   assert.equal(select({ 'npm-tool': 'codetestament@0.6.0-preview.3', 'dependency-metadata': true }).version, '0.6.0-preview.3');
   assert.equal(select({ 'npm-tool': 'codetestament@0.6.0-preview.3' }).toolName, 'CodeTestament.JavaScript');
   write({ dependencies: { 'codemetrics-ai': '0.2.0' } });
