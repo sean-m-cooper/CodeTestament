@@ -27,9 +27,9 @@ SARIF 2.1.0 export includes stable rule IDs, fingerprints, relative locations, o
 
 Do not average ecosystem scores. JS/TS scores are uncalibrated across ecosystems, and its implemented dimensions have a narrower scope than .NET. See `shared/scorecard-schema/migration-v3.md` for consumer migration and missing-signal handling.
 
-## Portable JS/TS configuration (development)
+## Portable JS/TS configuration
 
-The development analyzer excludes the checkout's absolute location from configuration
+CodeTestament 0.5.2 and 0.6.0-preview.4 exclude the checkout's absolute location from configuration
 identity. Compiler paths equal to the repository root become `<root>`; paths beneath
 it become `<root>/relative/path`. This includes TypeScript's resolved `baseUrl`,
 `rootDir`, `rootDirs` and `pathsBasePath`, including inherited workspace settings.
