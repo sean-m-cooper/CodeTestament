@@ -55,6 +55,13 @@ The tool scores your codebase across 9 quality dimensions (0-10 scale):
 | Dependency Management | Rule-based — vulnerabilities, outdated, deprecated, version drift; failed commands are unscored |
 | Architecture & SOLID | Rule-based — project cycles, layering violations, metric hotspots |
 
+**Security (development):** EF Core's resolved `FormattableString` SQL overloads
+parameterize interpolated values and do not produce SQL-injection findings.
+Interpolation or concatenation directly in the SQL text passed to a `Raw` overload
+remains a finding; separately supplied parameter values do not. See the
+[SQL detection policy](../../docs/dotnet-sql-security.md) for recognition boundaries.
+A clean static security score does not establish that an application is secure.
+
 **Complexity & Decomposition** retains the `codeQuality` evidence key and one combined score. Development ruleset `dotnet-2026-09-12-method-population` scores Method complexity as 40% of one worst individual-function score plus 60% of the mean of the remaining functions. Own CC 3/5/10/20/40 maps to individual scores 10/8/6/4/0 with linear interpolation and clamping. A single-function scope uses its individual score. Repeated observations across projects/frameworks count once at maximum variant CC; function hotspots retain names, locations and variant details. The aggregate uses decimal arithmetic and half-up rounding to one decimal.
 
 Decomposition retains its executable complexity per qualifying function within each type instance, with separate type hotspots. Fields, bodyless members and branch-free callbacks/initializers do not inflate that denominator. The combined C&D score remains the mean of its two rounded components, and overall weighting is unchanged. Interpret 10 as exceptional and 8 as a strong engineering target; high CC describes branching burden, not proof of defects or poor runtime performance. Raw CSV metrics remain unchanged. Read the recorded policy when interpreting older evidence or legacy-input fallbacks. See [component presentation and compatibility](../../shared/scorecard-schema/scoring-decisions.md#complexity-and-decomposition-presentation).
