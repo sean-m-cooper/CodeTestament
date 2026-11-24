@@ -33,7 +33,9 @@ not demonstrate code improvement, and 0.6.x comparisons are rejected.
 
 Python remains adapter 0.15.0 with at most two scored dimensions; Python Error
 Handling remains unscored. .NET remains CodeTestament.Scorecard 2.4.3.
-The skill default is promoted after registry installation checks pass.
+Plugin 0.4.0 selects npm 0.7.0 after clean-cache registry verification. Update
+the CodeTestament plugin and reload the host. Exact repository pins remain
+authoritative; update any 0.6.x pin explicitly to use the new scoring policy.
 
 Validation includes analyzer tests, installed npm package checks, isolated skill
 tests, mixed .NET/JS/Python audits, historical imports, and Express/Zod source

@@ -1,6 +1,6 @@
 # Python Analyzer
 
-Stable `codetestament@0.6.0` includes the Python analyzer and coverage collector. Python 3.12's native AST supplies versioned function facts to the shared population engine. The Python assessment scores Method Complexity and Async/Blocking Usage when eligible implementations exist; the other seven dimensions remain unscored.
+Stable `codetestament@0.7.0` includes the Python analyzer and coverage collector. Python 3.12's native AST supplies versioned function facts to the shared population engine. The Python assessment scores Method Complexity and Async/Blocking Usage when eligible implementations exist; the other seven dimensions remain unscored.
 
 ## Location
 

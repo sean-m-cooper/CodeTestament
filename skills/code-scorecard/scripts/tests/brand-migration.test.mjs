@@ -127,7 +127,7 @@ test('legacy pins and CodeTestament packages integrate without sharing caches', 
     write('ui/package.json', JSON.stringify({ name: 'ui', devDependencies: { 'codemetrics-ai': '0.2.0' } }));
     const run = success({ 'npm-package': archive, ...(currentTool === compatibility.defaults.npm ? { 'evidence-package': newNpm } : {}) }, '--entry-point', 'ui/package.json');
     assert.equal(run.recordedTool.version, '0.2.0'); assert.equal(run.tooling.analyzer.version, '0.2.0');
-    assert.equal(run.tooling.evidence.version, '0.6.0');
+    assert.equal(run.tooling.evidence.version, compatibility.evidenceToolVersion);
     write('ui/package.json', '{"name":"ui"}');
   });
   if (process.env.SCORECARD_MIGRATION_RECEIPT) fs.writeFileSync(process.env.SCORECARD_MIGRATION_RECEIPT,

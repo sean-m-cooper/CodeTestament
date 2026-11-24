@@ -12,7 +12,7 @@ test('published defaults install into empty caches and validate all three ecosys
   skip: !destination, timeout: 300_000,
 }, () => {
   assert.deepEqual(compatibility.defaults, {
-    'javascript-typescript': 'codetestament@0.6.0', npm: 'codetestament@0.6.0', dotnet: 'CodeTestament.Scorecard@2.4.3',
+    'javascript-typescript': 'codetestament@0.7.0', npm: 'codetestament@0.7.0', dotnet: 'CodeTestament.Scorecard@2.4.3',
   });
   const output = path.resolve(destination);
   assert.ok(!fs.existsSync(output), 'Release verification requires a new output directory.');
@@ -50,8 +50,11 @@ public class UnsafeSql {
     private const string ApiKey = "syntheticCredentialValue1234";
   }`);
   write('ui/package.json', '{"name":"registry-fixture","private":true}');
+  write('ui/package-lock.json', '{"lockfileVersion":3,"packages":{"":{"name":"registry-fixture"}}}');
   write('ui/tsconfig.json', '{"compilerOptions":{"baseUrl":".","rootDir":"."}}');
-  write('ui/work.ts', 'export function choose(value: number) { return value > 0 ? value : 0; }');
+  write('ui/work.ts', 'export async function choose(value: number) { try { return await Promise.resolve(value > 0 ? value : 0); } catch (error) { throw error; } }');
+  write('ui/README.md', '# Registry fixture\nInstall and use this example package. Run tests with node --test.\n');
+  write('ui/work.test.js', "import { test } from 'node:test'; import assert from 'node:assert/strict'; test('fixture', () => { assert.ok(true); });");
   write('python/pyproject.toml', '[project]\nname="registry-fixture"\nversion="0.0.0"\n');
   write('python/work.py', 'import time\nasync def work():\n    time.sleep(1)\n');
   const env = { ...process.env, NUGET_PACKAGES: path.join(output, 'restore-packages'),
@@ -77,7 +80,7 @@ public class UnsafeSql {
   assert.equal(result.results.length, 3);
   assert.equal(new Set(result.results.map(run => run.runId)).size, 3);
   const expected = { dotnet: ['CodeTestament.Scorecard', '2.4.3'],
-    'javascript-typescript': ['CodeTestament.JavaScript', '0.6.0'], python: ['CodeTestament.Python', '0.15.0'] };
+    'javascript-typescript': ['CodeTestament.JavaScript', '0.7.0'], python: ['CodeTestament.Python', '0.15.0'] };
   for (const run of result.results) {
     assert.equal(run.status, 'complete'); assert.equal(run.fresh, true);
     assert.equal(run.source, 'compatibility-manifest');
@@ -106,11 +109,15 @@ public class UnsafeSql {
       assert.match(sql[0].message, /ExecuteSqlRaw/);
     } else {
       const installed = JSON.parse(fs.readFileSync(path.join(run.tooling.analyzer.cache, 'node_modules/codetestament/package.json'), 'utf8'));
-      assert.equal(installed.name, 'codetestament'); assert.equal(installed.version, '0.6.0');
+      assert.equal(installed.name, 'codetestament'); assert.equal(installed.version, '0.7.0');
       const lock = JSON.parse(fs.readFileSync(path.join(run.tooling.analyzer.cache, 'package-lock.json'), 'utf8'));
       const provenance = lock.packages['node_modules/codetestament'];
       assert.match(provenance.resolved, /^https:\/\/registry\.npmjs\.org\/codetestament\/-\//);
       assert.match(provenance.integrity, /^sha512-/);
+      if (run.ecosystem === 'javascript-typescript') {
+        assert.equal(Object.values(evidence.dimensions).filter(value => value.status === 'scored').length, 9);
+        assert.equal(evidence.dimensions.codeQuality.componentDetails.decomposition.version, 3);
+      }
       if (run.ecosystem === 'python') {
         assert.equal(evidence.dimensions.errorHandling.status, 'skipped');
         assert.equal(evidence.dimensions.errorHandling.score, undefined);
@@ -120,7 +127,7 @@ public class UnsafeSql {
   }
   const baseline = result.results.find(run => run.ecosystem === 'javascript-typescript');
   const relocated = path.join(output, 'other-worktree'); fs.mkdirSync(path.join(relocated, 'ui'), { recursive: true });
-  for (const file of ['package.json', 'tsconfig.json', 'work.ts'])
+  for (const file of ['package.json', 'package-lock.json', 'tsconfig.json', 'work.ts', 'README.md', 'work.test.js'])
     fs.copyFileSync(path.join(root, 'ui', file), path.join(relocated, 'ui', file));
   const relocatedRepository = invoke('git', ['init', relocated]);
   assert.equal(relocatedRepository.status, 0, relocatedRepository.stdout + relocatedRepository.stderr);

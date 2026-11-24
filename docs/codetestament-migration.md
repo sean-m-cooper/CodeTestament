@@ -1,8 +1,8 @@
 # Moving to CodeTestament
 
 CodeMetrics.AI is becoming **CodeTestament**, with **CodeTestament Scorecard** as
-the assessment product. NuGet `CodeTestament.Scorecard@2.4.3` and stable npm `codetestament@0.6.0` are published. GitHub is now
-`sean-m-cooper/CodeTestament`, and plugin 0.3.0 selects these exact defaults.
+the assessment product. NuGet `CodeTestament.Scorecard@2.4.3` and stable npm `codetestament@0.7.0` are published. GitHub is now
+`sean-m-cooper/CodeTestament`, and plugin 0.4.0 selects these exact defaults.
 Supported legacy repository pins remain honored.
 
 The [local validation checkpoint](codetestament-migration-validation.md) records
@@ -13,7 +13,7 @@ executed tests, paired artifact hashes and remaining release checks.
 | Distribution | Version | Commands |
 | --- | --- | --- |
 | NuGet `CodeTestament.Scorecard` | `2.4.3` | `codetestament-dotnet` |
-| npm `codetestament` (stable JS/TS and Python) | `0.6.0` | `codetestament`, `codetestament-evidence`, `codetestament-python`, `codetestament-python-collect` |
+| npm `codetestament` (stable JS/TS and Python) | `0.7.0` | `codetestament`, `codetestament-evidence`, `codetestament-python`, `codetestament-python-collect` |
 
 The npm default command still analyzes JS/TS. Python remains a partial assessment, with at
 most Method Complexity and Async/Blocking Usage scored (2/9 dimensions). Error
@@ -21,15 +21,15 @@ Handling stays unscored. The Python adapter version remains `0.15.0`; it is not
 the npm distribution version. The explicit coverage collector executes tests;
 ordinary Python analysis parses source without importing the target.
 
-Stable 0.6.0 includes Python and the optional JS/TS dependency metadata probe.
+Stable 0.7.0 includes Python, nine-dimension JS/TS scoring and the optional dependency metadata probe.
 The older 0.5.x releases remain supported for existing exact repository pins.
 
 ## Install published packages
 
 ```sh
 dotnet tool install --global CodeTestament.Scorecard --version 2.4.3
-npm exec --yes --package=codetestament@0.6.0 -- codetestament --help
-npm exec --yes --package=codetestament@0.6.0 -- codetestament-python --help
+npm exec --yes --package=codetestament@0.7.0 -- codetestament --help
+npm exec --yes --package=codetestament@0.7.0 -- codetestament-python --help
 ```
 
 The new commands coexist with legacy installations. Use the exact stable version above. The skill installs both distributions into isolated
@@ -50,7 +50,7 @@ Pop-Location
 dotnet tool install CodeTestament.Scorecard --version 2.4.3 --tool-path ./TestResults/codetestament-tools --add-source ./TestResults/brand-migration/current
 ./TestResults/codetestament-tools/codetestament-dotnet --help
 
-npm install --prefix ./TestResults/codetestament-npm --ignore-scripts --no-audit --no-fund ./TestResults/brand-migration/current/codetestament-0.6.0.tgz
+npm install --prefix ./TestResults/codetestament-npm --ignore-scripts --no-audit --no-fund ./TestResults/brand-migration/current/codetestament-0.7.0.tgz
 ./TestResults/codetestament-npm/node_modules/.bin/codetestament --help
 ./TestResults/codetestament-npm/node_modules/.bin/codetestament-python --help
 ```
@@ -91,7 +91,7 @@ CodeTestament tag `v2.4.0`. Build those revisions in separate checkouts. Version
 parity candidate. Retain the exact archives and use a fresh output directory on each run:
 
 ```powershell
-node scripts/verify-brand-migration.mjs --legacy-npm TestResults/brand-migration/legacy/codemetrics-ai-0.6.0-preview.2.tgz --current-npm TestResults/brand-migration/current/codetestament-0.6.0.tgz --legacy-nuget TestResults/brand-migration/legacy/CodeMetrics.AI.2.3.1.nupkg --current-nuget TestResults/brand-migration/current/CodeTestament.Scorecard.2.4.0.nupkg
+node scripts/verify-brand-migration.mjs --legacy-npm TestResults/brand-migration/legacy/codemetrics-ai-0.6.0-preview.2.tgz --current-npm TestResults/brand-migration/current/codetestament-0.7.0.tgz --legacy-nuget TestResults/brand-migration/legacy/CodeMetrics.AI.2.3.1.nupkg --current-nuget TestResults/brand-migration/current/CodeTestament.Scorecard.2.4.0.nupkg
 ```
 
 The verifier installs both names together, checks command shims and package
