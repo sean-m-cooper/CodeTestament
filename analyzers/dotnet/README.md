@@ -1,6 +1,6 @@
 # CodeTestament Scorecard
 
-> Published as `CodeTestament.Scorecard@2.4.2`. Existing CodeMetrics.AI
+> Published as `CodeTestament.Scorecard@2.4.3`. Existing CodeMetrics.AI
 > installations continue to use `code-metrics`; the new command is
 > `codetestament-dotnet`. See the [migration guide](../../docs/codetestament-migration.md).
 
@@ -9,7 +9,7 @@ A .NET 10 global tool that performs deterministic static analysis on .NET soluti
 ## Install
 
 ```bash
-dotnet tool install -g CodeTestament.Scorecard --version 2.4.2
+dotnet tool install -g CodeTestament.Scorecard --version 2.4.3
 ```
 
 ## Usage
@@ -55,7 +55,7 @@ The tool scores your codebase across 9 quality dimensions (0-10 scale):
 | Dependency Management | Rule-based — vulnerabilities, outdated, deprecated, version drift; failed commands are unscored |
 | Architecture & SOLID | Rule-based — project cycles, layering violations, metric hotspots |
 
-**Security (development):** EF Core's resolved `FormattableString` SQL overloads
+**Security:** EF Core's resolved `FormattableString` SQL overloads
 parameterize interpolated values and do not produce SQL-injection findings.
 Interpolation or concatenation directly in the SQL text passed to a `Raw` overload
 remains a finding; separately supplied parameter values do not. See the

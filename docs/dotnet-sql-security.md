@@ -1,7 +1,7 @@
 # .NET SQL security detection
 
-This correction is implemented in development; the published .NET 2.4.2 analyzer
-still uses the earlier syntax-only detection.
+CodeTestament.Scorecard 2.4.3 corrects EF Core SQL false positives. Earlier
+versions use syntax-only detection for this rule.
 
 The analyzer checks the resolved EF Core method and SQL parameter type before
 classifying interpolation. EF Core's `FormattableString` overloads preserve the

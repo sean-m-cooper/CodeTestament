@@ -7,7 +7,7 @@
     <PackAsTool>true</PackAsTool>
     <ToolCommandName>codetestament-dotnet</ToolCommandName>
     <PackageId>CodeTestament.Scorecard</PackageId>
-    <Version>2.4.2</Version>
+    <Version>2.4.3</Version>
     <Description>Deterministic code metrics and scorecard evidence for .NET solutions</Description>
     <Authors>Sean Cooper</Authors>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
