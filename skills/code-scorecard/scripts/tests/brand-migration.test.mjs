@@ -25,9 +25,11 @@ test('legacy pins and CodeTestament packages integrate without sharing caches', 
     assert.ifError(result.error);
     return { code: result.status, value: result.stdout.trim() ? JSON.parse(result.stdout) : null, error: result.stderr };
   };
+  const currentTool = process.env.SCORECARD_TEST_NPM_TOOL ?? compatibility.defaults.npm;
+  const currentVersion = currentTool.split('@')[1];
   const legacy = { 'npm-tool': 'codemetrics-ai@0.6.0-preview.2', 'dotnet-tool': 'CodeMetrics.AI@2.3.1',
-    'npm-package': oldNpm, 'dotnet-package': oldNet, 'evidence-package': newNpm };
-  const modern = { 'npm-tool': 'codetestament@0.6.0', 'dotnet-tool': 'CodeTestament.Scorecard@2.4.3', 'npm-package': newNpm, 'dotnet-package': newNet };
+    'npm-package': oldNpm, 'dotnet-package': oldNet, ...(currentTool === compatibility.defaults.npm ? { 'evidence-package': newNpm } : {}) };
+  const modern = { 'npm-tool': currentTool, 'dotnet-tool': 'CodeTestament.Scorecard@2.4.3', 'npm-package': newNpm, 'dotnet-package': newNet };
   const success = (options, ...args) => {
     const result = invoke(options, ...args); assert.equal(result.code, 0, result.error + JSON.stringify(result.value));
     receipts.push(...result.value.results); return result.value.results[0];
@@ -56,7 +58,7 @@ test('legacy pins and CodeTestament packages integrate without sharing caches', 
       assert.ok(run.tooling.analyzer.archiveSha256);
       if (run.ecosystem === 'dotnet') { assert.equal(run.ruleCatalog.status, 'available'); assert.equal(readJson(run.artifacts.ruleCatalog).tool.name, names.dotnet); }
       if (run.ecosystem === 'python') {
-        assert.equal(run.packageVersion, '0.6.0'); assert.equal(run.version, '0.15.0');
+        assert.equal(run.packageVersion, currentVersion); assert.equal(run.version, '0.15.0');
         assert.equal(evidence.dimensions.errorHandling.status, 'skipped'); assert.equal(evidence.dimensions.errorHandling.score, undefined);
       }
     }
@@ -68,7 +70,7 @@ test('legacy pins and CodeTestament packages integrate without sharing caches', 
     assert.equal(readJson(before.artifacts.evidence).tool.name, 'codemetrics-ai');
     assert.notEqual(before.tooling.analyzer.cache, after.tooling.analyzer.cache);
     assert.equal(fs.readFileSync(path.join(oldCache, 'preserve'), 'utf8'), 'legacy cache layout');
-    write('ui/package.json', JSON.stringify({ name: 'ui', devDependencies: { codetestament: '0.6.0' } }));
+    write('ui/package.json', JSON.stringify({ name: 'ui', devDependencies: { codetestament: currentVersion } }));
     const pinned = success({ 'npm-package': newNpm }, '--entry-point', 'ui/package.json');
     assert.equal(pinned.source, 'repository-pin'); assert.equal(pinned.recordedTool.name, 'CodeTestament.JavaScript');
     const conflict = invoke(modern, '--entry-point', 'ui/package.json', '--npm-tool', 'codemetrics-ai@0.6.0-preview.2');
@@ -123,7 +125,7 @@ test('legacy pins and CodeTestament packages integrate without sharing caches', 
     const archive = process.env.SCORECARD_OLD_JS_PACKAGE;
     assert.ok(archive, 'Supply SCORECARD_OLD_JS_PACKAGE for codemetrics-ai 0.2.0.');
     write('ui/package.json', JSON.stringify({ name: 'ui', devDependencies: { 'codemetrics-ai': '0.2.0' } }));
-    const run = success({ 'npm-package': archive, 'evidence-package': newNpm }, '--entry-point', 'ui/package.json');
+    const run = success({ 'npm-package': archive, ...(currentTool === compatibility.defaults.npm ? { 'evidence-package': newNpm } : {}) }, '--entry-point', 'ui/package.json');
     assert.equal(run.recordedTool.version, '0.2.0'); assert.equal(run.tooling.analyzer.version, '0.2.0');
     assert.equal(run.tooling.evidence.version, '0.6.0');
     write('ui/package.json', '{"name":"ui"}');

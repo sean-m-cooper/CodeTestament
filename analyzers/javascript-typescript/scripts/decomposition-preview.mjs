@@ -42,7 +42,7 @@ export function preview(evidence) {
   assert.equal(evidence.analysis.status, 'complete');
   const profile = evidence.dimensions.codeQuality.componentDetails.decomposition;
   assert.equal(profile.measurement, 'owned-executable-statements-v2');
-  const measured = new Map(evidence.dimensions.codeQuality.scoring.observations.functionContributions.map(row => [row.id, row]));
+  const measured = new Map((evidence.dimensions.codeQuality.componentDetails.methodComplexity.scoring ?? evidence.dimensions.codeQuality.scoring).observations.functionContributions.map(row => [row.id, row]));
   const rows = profile.modules.flatMap(module => module.functions.map(row => {
     const match = measured.get(row.id); assert.ok(match, `Missing function ${row.id}`);
     return { ...row, file: module.file, ownComplexity: match.ownComplexity, ownMaintainabilityIndex: match.ownMaintainabilityIndex };

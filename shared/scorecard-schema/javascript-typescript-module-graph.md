@@ -1,5 +1,7 @@
 # JS/TS module dependency evidence, version 1
 
+In 0.7.0 the [nine-dimension scoring policy](../../analyzers/javascript-typescript/SCORING.md) supersedes the historical score-availability rules below. Recognition evidence remains applicable.
+
 Development ruleset `javascript-typescript-2026-10-02-module-graph` adds
 `dimensions.architecture.dependencyGraph`. This is a bounded evidence pass, not
 an architecture scoring policy. Successful source analysis leaves Architecture

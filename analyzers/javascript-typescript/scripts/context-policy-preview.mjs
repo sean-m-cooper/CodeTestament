@@ -24,7 +24,7 @@ export function contextPreview(evidence) {
   assert.equal(evidence.analysis.status,'complete');
   const decomposition=preview(evidence);
   const quality=evidence.dimensions.codeQuality;
-  const measurements=new Map(quality.scoring.observations.functionContributions.map(r=>[r.id,r]));
+  const measurements=new Map((quality.componentDetails.methodComplexity.scoring ?? quality.scoring).observations.functionContributions.map(r=>[r.id,r]));
   const rows=quality.componentDetails.decomposition.modules.flatMap(m=>m.functions.map(row=>({
     ...row,file:m.file,ownComplexity:measurements.get(row.id).ownComplexity,
     ownMaintainabilityIndex:measurements.get(row.id).ownMaintainabilityIndex })));

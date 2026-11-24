@@ -1,5 +1,7 @@
 # JS/TS Error Handling: failure disposition v2
 
+In 0.7.0 the [nine-dimension scoring policy](../../analyzers/javascript-typescript/SCORING.md) supersedes the historical score-availability rules below. Recognition evidence remains applicable.
+
 Version 0.5.0 ruleset: `javascript-typescript-2026-10-09-handler-contracts`.
 Version 0.4.0 retains its historical unscored handler evidence. Fresh baselines
 are required when adopting the new ruleset, including from the unpublished v1 prototype.

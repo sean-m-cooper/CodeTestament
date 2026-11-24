@@ -1,9 +1,10 @@
 # CodeTestament JavaScript and TypeScript
 
-> Stable release: `codetestament@0.6.0` for JS/TS and Python.
+> Version 0.7.0: nine-dimension JS/TS scoring.
+> 0.7.0 implements all nine scoring dimensions; see [the scoring policy](SCORING.md). Evidence gaps still produce unavailable scores.
 > See the [migration guide](../../docs/codetestament-migration.md).
 
-Deterministic source analysis for JavaScript, TypeScript, JSX and TSX, with Python support in stable 0.6.0. The package implements source metrics and React hook/effect checks and emits schema-v3 evidence, including executed scoring decisions. Scores are **uncalibrated across ecosystems**; compare them only with compatible runs of this analyzer.
+Deterministic source analysis for JavaScript, TypeScript, JSX and TSX, with Python support in the same package. The package implements source metrics and React hook/effect checks and emits schema-v3 evidence, including executed scoring decisions. Scores are **uncalibrated across ecosystems**; compare them only with compatible runs of this analyzer.
 
 Each scored dimension includes `scoringDecision`: policy inputs, executed steps, rounding and finding attribution. These are aggregate policy decisions, not independent finding deductions. See [the decision contract](../../shared/scorecard-schema/scoring-decisions.md).
 
@@ -13,10 +14,12 @@ contextual Error Handling scoring. Adopting it requires a fresh baseline. See th
 
 The earlier 0.4.0 ruleset `javascript-typescript-2026-10-04-local-handlers` replaces the published 0.3.0 maximum-CC/median-MI ladders with owned-function population scores and extends React-only checks with bounded promise-usage analysis. It also corrects erased TypeScript syntax in owned-body measurements, scores async usage by affected eligible owners, and adds unscored module dependency, decomposition, and error-handler evidence. Generate new baselines when upgrading from 0.3.0. See the [0.4.0 release and migration notes](https://github.com/sean-m-cooper/CodeTestament/blob/master/docs/releases/javascript-typescript-0.4.0.md).
 
+Install the exact release, or build this checkout and run `node dist/cli.js`.
+
 ```sh
-npm exec --yes --package=codetestament@0.6.0 -- codetestament --project package.json
-npm exec --yes --package=codetestament@0.6.0 -- codetestament --project package.json --tsconfig tsconfig.json
-npm exec --yes --package=codetestament@0.6.0 -- codetestament --output results/metrics.csv --scorecard-output results/evidence.json
+npm exec --yes --package=codetestament@0.7.0 -- codetestament --project package.json
+npm exec --yes --package=codetestament@0.7.0 -- codetestament --project package.json --tsconfig tsconfig.json
+npm exec --yes --package=codetestament@0.7.0 -- codetestament --output results/metrics.csv --scorecard-output results/evidence.json
 ```
 
 Default output paths are `.scorecard/javascript-typescript/metrics.csv` and `.scorecard/javascript-typescript/evidence.json`, relative to the current directory. Node 20 or later is required. The TypeScript compiler API is a pinned runtime dependency, so an installed package can analyze source without a development checkout.
@@ -29,13 +32,15 @@ Changing tool identity requires fresh baselines. Legacy codemetrics-ai 0.5.0 doe
 
 | Dimension | Implementation |
 |---|---|
-| codeQuality (Method Complexity) | 40% one worst function score + 60% mean remaining; owned CC findings above 10. Decomposition has descriptive size/distribution evidence and no score. |
+| codeQuality (Complexity & Decomposition) | Mean of Method Complexity and owned-statement Decomposition; both component scores and populations are recorded. |
 | maintainability | 40% mean weakest ceil(N/5) function scores + 60% mean remaining |
 | performanceAsync (Async/Blocking Usage) | React hook/effect checks, standard Promise async executors, and informational async Array.forEach callbacks |
-| architecture | Module dependencies, explicit type-only separation, internal cycle groups and fan-in/out rankings; score remains unmeasured |
-| errorHandling | Contextual failure dispositions for distinct catch/Promise handler bodies; scores unexplained swallowing only with a fully assessed population |
-| dependencyManagement (unscored) | npm lockfile v2/v3 and pnpm v9 inventory, workspace uses, optional public-registry deprecation/update/advisory observations; no score |
-| Other dimensions | Explicitly skipped |
+| errorHandling | Contextual failure dispositions for distinct catch/Promise handler bodies; scores unexplained swallowing among assessed bodies, disclosing unknown bodies and unresolved uses |
+| dependencyManagement | Complete npm/pnpm inventory plus successful requested public-registry health assessment; missing evidence remains unavailable. |
+| architecture | Implementation dependency concentration; cycles and barrels are not penalized. |
+| testing | Static test declarations, active/placeholder rates and direct assertion signals; not execution or coverage. |
+| security | Bounded private-key and dynamic code/shell patterns; not a security certification. |
+| documentation | README, usage and verification guidance signals. |
 
 React checks run only when a source file imports React. Aliased named imports and namespace imports are recognized; local functions shadowing imports are excluded. Missing dependency arrays are advisory because running after every render can be intentional. The implementation does not claim exhaustive Rules of Hooks, dependency-array correctness, or general concurrency analysis. Source syntax errors make the run incomplete and source dimensions unscored. Semantic type errors are outside this AST-focused version's completeness check.
 
@@ -52,13 +57,15 @@ Async usage scores the percentage of eligible function/module owners with scored
 
 This is bounded source analysis, not promise-flow verification. Referenced executor/callback functions, constructor aliases, runtime monkey-patching, arbitrary libraries, floating promises and exhaustive hook control flow are outside scope. See the [policy and supporting references](../../shared/scorecard-schema/javascript-typescript-async-policy.md).
 
-## Decomposition and error-handling evidence
+## Historical 0.6.x decomposition and error-handling evidence
+
+0.7.0 supersedes the unscored and whole-population withholding behavior below. See [SCORING.md](SCORING.md).
 
 `codeQuality.componentDetails.decomposition` version 2 uses owned executable statements as its primary measure. It ranks functions/modules by statements and reports statement totals, median/p90, and module concentration. Lines and initializer/literal/declaration/re-export observations remain context. Nested bodies are counted separately. Size is not responsibility: data tables, barrels, and orchestration roles receive no inferred defect or deduction. Code Quality remains a method-complexity score.
 
 `errorHandling.handlerEvidence` preserves empty/documented/nonempty syntax measurements and links each distinct implementation to its uses. Referenced Promise callbacks resolve through function declarations, const aliases, and imports within selected source. The new `dispositionEvidence` separates explicit outcomes, recognized fallback, documented intent, unexplained swallowing, and unknown paths. Nonempty code alone does not establish handling. Attached intent is honored without judging the business rationale.
 
-When every observed body is assessed and no callback uses are unresolved, Error Handling scores `10 - 10 * unexplainedSwallowing / assessedHandlers`, capped at 9 if any issue exists, rounded half up to one decimal. Shared bodies count once. Unknown dispositions, unresolved callbacks, and absent populations yield no score. Scores describe bounded handling signals, not proven recovery or bugs. See the [policy and recognition limits](../../shared/scorecard-schema/javascript-typescript-error-handling-policy.md).
+When every observed body is assessed and no callback uses are unresolved, Error Handling scores `10 - 10 * unexplainedSwallowing / assessedHandlers`, capped at 9 if any issue exists, rounded half up to one decimal. Shared bodies count once. In 0.6.x, unknown dispositions, unresolved callbacks, and absent populations yield no score. In 0.7.0 only the assessed subset is scored; coverage is mandatory. Scores describe bounded handling signals, not proven recovery or bugs. See the [policy and recognition limits](../../shared/scorecard-schema/javascript-typescript-error-handling-policy.md).
 
 ## Module architecture evidence
 
@@ -70,7 +77,7 @@ Coverage distinguishes `internal`, `external`, `builtin`, `outOfScope`, `unavail
 
 Cycles are strongly connected groups of resolved internal value/mixed dependencies; repeated imports count once toward fan-in/out. Cycles are informational review leads and carry no score penalty. Dynamic-literal imports and CommonJS calls can be conditional or deferred; a cycle does not establish an initialization failure. Top-ten fan-in/out lists are observations, with no invented defect cutoff. Re-export-only modules are marked for barrel-file context.
 
-Architecture retains `status: skipped` and no score until calibration. Other measured dimensions remain usable when this diagnostic graph has resolution gaps. Source parse failures retain partial graph evidence with `status: failed` and the existing incomplete-analysis exit. Schema v3 is unchanged; the new scope/ruleset requires fresh baselines. See the [graph contract](../../shared/scorecard-schema/javascript-typescript-module-graph.md).
+In 0.6.x and earlier, Architecture retains `status: skipped` and no score until calibration. Other measured dimensions remain usable when this diagnostic graph has resolution gaps. Source parse failures retain partial graph evidence with `status: failed` and the existing incomplete-analysis exit. Schema v3 is unchanged; the new scope/ruleset requires fresh baselines. See the [graph contract](../../shared/scorecard-schema/javascript-typescript-module-graph.md).
 
 ## Dependency observations (development)
 
@@ -86,7 +93,7 @@ installations retain their locations without creating independent penalties.
 Deprecation, `wanted` updates within direct declared ranges, `latest` releases,
 and advisories are separate observations. Exact pins and newer major versions do
 not establish neglect; advisory presence does not establish runtime reachability.
-The dimension remains unscored. See the [dependency policy](../../shared/scorecard-schema/javascript-typescript-dependency-policy.md)
+Through 0.6.x, the dimension remains unscored. See the [dependency policy](../../shared/scorecard-schema/javascript-typescript-dependency-policy.md)
 for counting, limits, availability, and calibration boundaries.
 
 ## Discovery
@@ -97,7 +104,7 @@ Build output, node_modules, metadata, declarations, test/fixture directories, `.
 
 ## Scored function policy
 
-Code quality measures **method complexity only**. Individual owned CC anchors are 3/5/10/20/40 → 10/8/6/4/0. MI anchors are 40/52/58/65/70/75 → 0/2/4/6/8/10. Both use linear interpolation and clamp to 0–10. A single function uses its own score; a scope with no implemented functions is skipped. Exactly one worst function receives 40% of complexity weight, even when several tie. For MI, the weakest `ceil(N/5)` functions receive 40% through their group mean. The remaining functions receive 60%; no function is in both groups.
+Through 0.6.x, Code Quality measures **method complexity only**. In 0.7.0 these measurements form the Method Complexity component of C&D. Individual owned CC anchors are 3/5/10/20/40 → 10/8/6/4/0. MI anchors are 40/52/58/65/70/75 → 0/2/4/6/8/10. Both use linear interpolation and clamp to 0–10. A single function uses its own score; a scope with no implemented functions is skipped. Exactly one worst function receives 40% of complexity weight, even when several tie. For MI, the weakest `ceil(N/5)` functions receive 40% through their group mean. The remaining functions receive 60%; no function is in both groups.
 
 Measurements use each function's **own body**, excluding its signature, nested functions, type declarations, classes and enums. Nested implemented functions are measured separately. Multiline literals contribute every occupied source line; comments and brace/semicolon-only lines contribute none. Implemented empty bodies receive MI 100. Owned MI retains its fractional value before scoring. Parameter defaults, module-level code, class static blocks and non-function field initializers are outside these function scores and are disclosed in scope. This is not full runtime-code coverage.
 
@@ -137,7 +144,7 @@ regenerated from their original source revision with the corrected analyzer;
 see [portable configuration and migration](../../docs/evidence-workflows.md#portable-jsts-configuration).
 
 ```sh
-npm exec --yes --package=codetestament@0.6.0 -- codetestament --baseline quality-baselines/javascript-typescript.json \
+npm exec --yes --package=codetestament@0.7.0 -- codetestament --baseline quality-baselines/javascript-typescript.json \
   --comparison-output results/comparison.json --fail-on-new warning \
   --max-score-drop 0 --sarif results/analysis.sarif
 
@@ -211,7 +218,7 @@ an assessable population. Decomposition remains unscored.
 
 ## Experimental Python command in development builds
 
-The stable npm package bundles `codetestament-python` and its Python 3.12 AST adapter, version `0.15.0`. It parses source without importing the target and produces evidence v3 with a production Method Complexity score, owned statements, block nesting, duplication, optional coverage/CRAP review evidence, and unscored exception-handler observations at `dimensions.errorHandling.review`, plus bounded lexical context and conservative patterns at `dimensions.errorHandling.contextReview`, with owned raise/cause syntax at `dimensions.errorHandling.transferReview` and owned calls/returns plus unresolved-suite inventory at `dimensions.errorHandling.operationReview`, and async-owned call evidence at `dimensions.performanceAsync.review`. `--coverage-json` imports observations; `--collection-manifest` checks their source binding. Adapter 0.15.0 also scores Async/Blocking Usage from production-owner contributions at `performanceAsync.asyncScoring`, with bounded paths at `performanceAsync.helperReview`. The other seven Python dimensions remain unavailable; decomposition, duplication, coverage/CRAP, and handler observations remain unscored. Install `codetestament@0.6.0` explicitly to use these commands; legacy codemetrics-ai 0.5.0 does not include them. For example: `npm exec --yes --package=codetestament@0.6.0 -- codetestament-python --project ./pyproject.toml --scorecard-output ./python-evidence.json`. The installed package includes its Python guide at `dist/python/README.md` and scoring policy at `dist/python/ASYNC_SCORING.md`. Ordinary analysis/import needs only Node.js 20+ and Python 3.12. The separate `codetestament-python-collect` command explicitly executes tests and requires a caller-supplied environment containing coverage.py and the project's test dependencies.
+The stable npm package bundles `codetestament-python` and its Python 3.12 AST adapter, version `0.15.0`. It parses source without importing the target and produces evidence v3 with a production Method Complexity score, owned statements, block nesting, duplication, optional coverage/CRAP review evidence, and unscored exception-handler observations at `dimensions.errorHandling.review`, plus bounded lexical context and conservative patterns at `dimensions.errorHandling.contextReview`, with owned raise/cause syntax at `dimensions.errorHandling.transferReview` and owned calls/returns plus unresolved-suite inventory at `dimensions.errorHandling.operationReview`, and async-owned call evidence at `dimensions.performanceAsync.review`. `--coverage-json` imports observations; `--collection-manifest` checks their source binding. Adapter 0.15.0 also scores Async/Blocking Usage from production-owner contributions at `performanceAsync.asyncScoring`, with bounded paths at `performanceAsync.helperReview`. The other seven Python dimensions remain unavailable; decomposition, duplication, coverage/CRAP, and handler observations remain unscored. Install `codetestament@0.6.0` explicitly to use these commands; legacy codemetrics-ai 0.5.0 does not include them. For example: `npm exec --yes --package=codetestament@0.7.0 -- codetestament-python --project ./pyproject.toml --scorecard-output ./python-evidence.json`. The installed package includes its Python guide at `dist/python/README.md` and scoring policy at `dist/python/ASYNC_SCORING.md`. Ordinary analysis/import needs only Node.js 20+ and Python 3.12. The separate `codetestament-python-collect` command explicitly executes tests and requires a caller-supplied environment containing coverage.py and the project's test dependencies.
 
 Python adapter 0.13.0 also embeds unscored async call context at `dimensions.performanceAsync.contextReview`, including unresolved reason/shape inventories and bounded local callback/stored-wrapper links. The package ships `dist/python/ASYNC_CONTEXT.md`; historical 0.12.0 reports remain valid without this extension.
 

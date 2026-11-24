@@ -18,7 +18,7 @@ test('Python Method Complexity installed package integrates with scope, freshnes
   const cache = path.join(temporary, 'cache');
   const write = (file, text) => { const full = path.join(root, file); fs.mkdirSync(path.dirname(full), { recursive: true }); fs.writeFileSync(full, text); };
   const invoke = (...args) => {
-    const result = spawnSync(process.execPath, [runner, '--repo', root, '--cache', cache, '--npm-package', npmPackage, ...args],
+    const result = spawnSync(process.execPath, [runner, '--repo', root, '--cache', cache, '--npm-package', npmPackage, '--npm-tool', process.env.SCORECARD_TEST_NPM_TOOL ?? compatibility.defaults.npm, ...args],
       { encoding: 'utf8', windowsHide: true, timeout: 180_000 });
     assert.ifError(result.error);
     return { code: result.status, value: result.stdout.trim() ? JSON.parse(result.stdout) : null, error: result.stderr };
@@ -264,7 +264,7 @@ test('Python Method Complexity installed package integrates with scope, freshnes
     fs.unlinkSync(path.join(root, 'app/src/bodies.py'));
   });
   await t.test('stale producer output is rejected even after a zero exit', async () => {
-    const tooling = await installTools({ cache, 'npm-package': npmPackage }, compatibility);
+    const tooling = await installTools({ cache, 'npm-package': npmPackage, 'npm-tool': process.env.SCORECARD_TEST_NPM_TOOL ?? compatibility.defaults.npm }, compatibility);
     const before = fs.readFileSync(tooling.python);
     try {
       fs.writeFileSync(tooling.python, `import fs from 'node:fs'; fs.copyFileSync(${JSON.stringify(initial.artifacts.evidence)}, process.argv[process.argv.indexOf('--scorecard-output') + 1]);`);
@@ -294,7 +294,7 @@ test('Python Method Complexity installed package integrates with scope, freshnes
     assert.deepEqual(failure.evidence.dimensions.codeQuality.findings, []);
   });
   await t.test('explicit packaged collection survives helper validation and source drift is rejected', async () => {
-    const tooling = await installTools({ cache, 'npm-package': npmPackage }, compatibility);
+    const tooling = await installTools({ cache, 'npm-package': npmPackage, 'npm-tool': process.env.SCORECARD_TEST_NPM_TOOL ?? compatibility.defaults.npm }, compatibility);
     write('app/exercise.py', 'from src.work import work\nassert work(1) == 1\n');
     const python = process.env.CODEMETRICS_COVERAGE_PYTHON ?? spawnSync(process.platform === 'win32' ? 'py' : 'python3',
       [...(process.platform === 'win32' ? ['-3.12'] : []), '-c', 'import sys; print(sys.executable)'], { encoding: 'utf8', windowsHide: true }).stdout.trim();
@@ -321,7 +321,7 @@ test('Python Method Complexity installed package integrates with scope, freshnes
     const result = invoke('--ecosystem', 'python', '--baseline', initial.artifacts.evidence, '--max-score-drop', '0');
     assert.equal(result.code, 0, result.error);
     assert.equal(compatibility.analyzers.python.requiresLocalPackage, false);
-    assert.equal(result.value.results[0].source, 'compatibility-manifest-local-package');
+    assert.equal(result.value.results[0].source, process.env.SCORECARD_TEST_NPM_TOOL ? 'explicit-selection' : 'compatibility-manifest-local-package');
   });
   await t.test('handler evidence remains unscored and stale or altered observations are rejected', () => {
     write('app/src/handlers.py', 'try: import optional\nexcept ImportError: pass\nclass Client:\n    try: load()\n    except Missing:\n        # Default configuration applies.\n        pass\n    def work(self):\n        try: run()\n        except Missing: return None\n');
@@ -364,7 +364,7 @@ test('Python Method Complexity installed package integrates with scope, freshnes
   });
   await t.test('polyglot audit preserves separate runs and a shared audit identity', () => {
     write('ui/package.json', '{"name":"fixture"}'); write('ui/app.js', 'export function app(){return 1;}');
-    const result = invoke('--npm-tool', compatibility.defaults.npm); assert.equal(result.code, 0, result.error);
+    const result = invoke('--npm-tool', process.env.SCORECARD_TEST_NPM_TOOL ?? compatibility.defaults.npm); assert.equal(result.code, 0, result.error);
     assert.deepEqual(result.value.results.map(item => item.ecosystem).sort(), ['javascript-typescript', 'python']);
     assert.equal(new Set(result.value.results.map(item => item.runId)).size, 2);
     assert.ok(result.value.results.every(item => item.auditId === result.value.auditId));

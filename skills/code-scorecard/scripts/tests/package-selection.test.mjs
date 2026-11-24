@@ -16,7 +16,7 @@ test('published CodeTestament defaults agree with compatibility metadata', () =>
     assert.equal(record.tools[ecosystem].version, compatibility.analyzers[ecosystem].preferredVersion);
     assert.equal(record.requiresLocalPackage, false);
   }
-  assert.ok(Object.values(compatibility.installations).flat().filter(record => record.package.startsWith('CodeTestament') || record.package === 'codetestament').every(record => !record.requiresLocalPackage));
+  assert.deepEqual(compatibility.installations.npm.filter(record => record.package === "codetestament" && record.requiresLocalPackage).map(record => record.version), ["0.7.0"]);
 });
 
 test('selects exact package records and rejects ambiguous or conflicting repository pins', t => {

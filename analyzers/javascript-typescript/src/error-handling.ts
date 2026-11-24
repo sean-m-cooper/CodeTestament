@@ -119,18 +119,18 @@ export function errorHandlingEvidence(results: ReturnType<typeof inspectErrorHan
   const decision = incomplete ? undefined : errorHandlingDecision(handlers.length, dispositions.unexplainedSwallowing, dispositions.unknown, uninspectedCallbacks.length);
   const findings = handlers.filter(handler => ["unexplainedSwallowing", "unknown"].includes(handler.disposition.classification))
     .map(handler => handlerFinding(handler, !!decision));
-  const scope: Dimension["scope"] = { id: "javascript-typescript/errorHandling/failure-disposition-v2", coverage: "partial",
+  const scope: Dimension["scope"] = { id: "javascript-typescript/errorHandling/assessed-dispositions-v3", coverage: "partial",
     includes: ["catch-clauses", "inline-standard-promise-rejection-handlers", "attached-intent", "selected-source-referenced-handlers", "bounded-failure-continuations"],
-    excludes: ["general-exception-flow", "arbitrary-callback-value-flow", "correctness-of-recovery", "semantic-rationale-judgment"] };
+    excludes: ["unknown-handler-dispositions", "unresolved-callback-uses", "general-exception-flow", "arbitrary-callback-value-flow", "correctness-of-recovery", "semantic-rationale-judgment"] };
   const dispositionEvidence = { version: 1, countingUnit: "distinctHandlerBody", totalHandlers: handlers.length,
     assessedHandlers: handlers.length - dispositions.unknown, unknownHandlers: dispositions.unknown, counts: dispositions,
     assessedPercent: handlers.length ? 100 * (handlers.length - dispositions.unknown) / handlers.length : null,
     unresolvedCallbackUses: uninspectedCallbacks.length, populationComplete: !incomplete && !dispositions.unknown && !uninspectedCallbacks.length };
   const dimension: Dimension = decision ? scored(decision,
-    "Partial Error Handling: unexplained swallowing among distinct assessed handler bodies. Documented intent is honored; failure outcomes are signals, not proof of correct recovery.",
+    "Partial Error Handling: unexplained swallowing among distinct assessed handler bodies. Unknown bodies and unresolved uses receive neither credit nor penalty; report assessed/total coverage alongside the score. Documented intent is honored.",
     findings, dispositionEvidence) : { status: incomplete ? "failed" : "skipped", findings,
       basis: incomplete ? "Incomplete source; handler observations are diagnostic only." : !handlers.length ? "No assessed handler population; error handling is unavailable." :
-      "Unknown handler dispositions or unresolved callback uses prevent a reliable population score." };
+      "No handler bodies have an assessable disposition; unknown bodies and unresolved uses remain review evidence." };
   return { ...dimension, scope, dispositionEvidence, handlerEvidence: { version: 2, countingUnit: "distinctHandlerBody",
       totalHandlers: handlers.length, unexplainedEmptyHandlers: unexplained, documentedEmptyHandlers: count("documentedEmpty"),
       handlersContainingCode: count("containsCode"), unexplainedEmptyPercent: handlers.length ? 100 * unexplained / handlers.length : null,

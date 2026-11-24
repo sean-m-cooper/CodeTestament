@@ -54,7 +54,7 @@ describe("production source analysis", () => {
       const result=run(fixture(source ? {"src/bad.ts":source} : {}));
       expect(result.evidence.analysis.status).toBe("incomplete");
       expect(result.evidence.dimensions.codeQuality.score).toBeUndefined();
-      expect(result.evidence.dimensions.security.status).toBe("skipped");
+      expect(result.evidence.dimensions.security.status).toBe("failed");
     }
   });
   it("uses repository-relative locations for a nested package", () => {
@@ -75,14 +75,14 @@ describe("evidence workflows", () => {
     const evidence=run(fixture({"src/a.ts":"export const a=()=>1;"})).evidence;
     // Source tests load the same schema as the installed dist files.
     expect(()=>validateEvidence(evidence)).not.toThrow();
-    evidence.dimensions.security.score=10;
+    evidence.dimensions.security.status="skipped";
     expect(()=>validateEvidence(evidence)).toThrow("Invalid evidence");
   });
   it("keeps fingerprints across checkout roots and line movement; reports additions and removals", () => {
     const source="import { useEffect } from 'react'; export function App(){ useEffect(async()=>{},[]); return null; }";
     const before=run(fixture({"src/a.ts":source})).evidence;
     const after=run(fixture({"src/a.ts":"\n\n"+source})).evidence;
-    expect(compare(after,before).unchanged).toHaveLength(1);
+    expect(compare(after,before).unchanged.filter(f => f.category === "asyncEffectCallback")).toHaveLength(1);
     expect(gate(compare(after,before),"warning",0)).toBe(false);
     const clean=run(fixture({"src/a.ts":"import {useEffect} from 'react'; export function App(){useEffect(()=>{},[]); return null;}"})).evidence;
     expect(compare(after,clean).new).toHaveLength(1);

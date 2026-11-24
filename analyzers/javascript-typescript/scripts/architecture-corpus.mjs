@@ -34,9 +34,14 @@ function inspect(id, root) {
   validateEvidence(evidence);
   assert.equal(evidence.analysis.status, 'complete');
   const architecture = evidence.dimensions.architecture;
-  assert.equal(architecture.status, 'skipped');
-  assert.equal(architecture.score, undefined);
-  assert.equal(architecture.scoringDecision, undefined);
+  if (architecture.status === 'skipped') {
+    assert.match(architecture.basis, /No implementation modules/);
+    assert.equal(architecture.score, undefined);
+  } else {
+    assert.equal(architecture.status, 'scored');
+    assert.equal(architecture.score, 10);
+    assert.equal(architecture.scoringDecision.finalScore, 10);
+  }
   assert(architecture.findings.every(f => f.severity === 'info' && f.observations.executionOrderEstablished === false));
   const content = JSON.stringify(evidence, null, 2) + '\n';
   fs.writeFileSync(path.join(output, `${id}.json`), content);
