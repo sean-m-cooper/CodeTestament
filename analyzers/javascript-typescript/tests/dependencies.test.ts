@@ -108,7 +108,7 @@ describe("dependency feed observations",()=>{
     const inventory=f.read().inventory,metadata=await dependencyMetadata(inventory,{package:async name=>feed(name),advisories:async()=>available({})});
     expect(metadata.status).toBe("available");expect(metadata.observations[0].upgrades![0]).toMatchObject({wanted:"1.1.0",newerWithinRange:true,latestOutsideRange:true});
     expect(metadata.observations[1].upgrades![0]).toMatchObject({wanted:"1.0.0",newerWithinRange:false,latestOutsideRange:true});
-    const dimension=dependencyEvidence(inventory,metadata);expect(dimension.score).toBeUndefined();expect(dimension.findings.every(f=>f.severity==="info")).toBe(true);
+    const dimension=dependencyEvidence(inventory,metadata);expect(dimension.score).toBe(6);expect(dimension.findings.every(f=>f.severity==="warning")).toBe(true);
     expect(dimension.findings.filter(f=>f.category==="updateWithinDeclaredRange").map(f=>f.package)).toEqual(["a"]);
   });
   it("matches advisories to exact installed versions and deduplicates repeated reports",async()=>{
@@ -117,6 +117,17 @@ describe("dependency feed observations",()=>{
     const metadata=await dependencyMetadata(f.read().inventory,{package:async()=>({status:"unavailable",reason:"HTTP 404"}),advisories:async()=>available({a:[row,row,{...row,id:43,vulnerable_versions:">=2"}]})});
     expect(metadata.status).toBe("partial");expect(metadata.observations[0].vulnerabilities.advisories).toHaveLength(1);
     expect(dependencyEvidence(f.read().inventory,metadata).findings).toHaveLength(1);
+  });
+  it('accepts package-keyed bulk advisories without a redundant name, rejecting conflicting names', async()=>{
+    const f=fixture({dependencies:{a:'1.0.0'}},{'node_modules/a':locked('a')});
+    const row={id:42,title:'Package-keyed advisory',url:'https://example.com/advisory',severity:'high',vulnerable_versions:'<2'};
+    const reader=(value:object):RegistryReader=>({package:async()=>feed('a'),advisories:async()=>available({a:[value]})});
+    const metadata=await dependencyMetadata(f.read().inventory,reader(row));
+    expect(metadata.status).toBe('available');expect(metadata.observations[0].vulnerabilities.advisories).toHaveLength(1);
+    expect(dependencyEvidence(f.read().inventory,metadata).score).toBe(2);
+    const mismatch=await dependencyMetadata(f.read().inventory,reader({...row,name:'different-package'}));
+    expect(mismatch.observations[0].vulnerabilities.status).toBe('unavailable');
+    expect(dependencyEvidence(f.read().inventory,mismatch).score).toBeUndefined();
   });
   it("respects explicit prerelease ranges and preserves unknown latest tags",async()=>{
     const f=fixture({dependencies:{a:"^1.0.0-beta.1"}},{"node_modules/a":locked("a","1.0.0-beta.1")});

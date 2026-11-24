@@ -3,10 +3,10 @@
   "corpusSha256": "2e439e89ff5833b0567c2f74faabe6b4cafb5bcaf3482778ae004fa34197d1b0",
   "tool": {
     "name": "CodeTestament.JavaScript",
-    "version": "0.6.0",
+    "version": "0.7.0",
     "ecosystem": "javascript-typescript"
   },
-  "ruleset": "javascript-typescript-2026-10-09-dependency-evidence",
+  "ruleset": "javascript-typescript-2026-11-24-nine-dimensions",
   "scope": "Only listed rules have accuracy labels. Fixture distributions do not establish cross-ecosystem comparability.",
   "accuracy": {
     "codeQuality/highFunctionComplexity": {
@@ -33,7 +33,7 @@
       "count": 6,
       "median": 10.0,
       "p25": 10.0,
-      "p10": 7.7
+      "p10": 8.25
     },
     "maintainability": {
       "count": 6,
@@ -48,11 +48,36 @@
       "p25": 0.0,
       "p10": 0.0
     },
-    "security": null,
-    "testing": null,
-    "documentation": null,
-    "dependencyManagement": null,
-    "architecture": null
+    "security": {
+      "count": 6,
+      "median": 10.0,
+      "p25": 10.0,
+      "p10": 10.0
+    },
+    "testing": {
+      "count": 6,
+      "median": 0.0,
+      "p25": 0.0,
+      "p10": 0.0
+    },
+    "documentation": {
+      "count": 6,
+      "median": 0.0,
+      "p25": 0.0,
+      "p10": 0.0
+    },
+    "dependencyManagement": {
+      "count": 6,
+      "median": 10.0,
+      "p25": 10.0,
+      "p10": 10.0
+    },
+    "architecture": {
+      "count": 6,
+      "median": 10.0,
+      "p25": 10.0,
+      "p10": 10.0
+    }
   },
   "samples": [
     {
@@ -66,13 +91,15 @@
         "maintainability": 10,
         "errorHandling": null,
         "performanceAsync": null,
-        "security": null,
-        "testing": null,
-        "documentation": null,
-        "dependencyManagement": null,
-        "architecture": null
+        "security": 10,
+        "testing": 0,
+        "documentation": 0,
+        "dependencyManagement": 10,
+        "architecture": 10
       },
-      "findings": {}
+      "findings": {
+        "documentation/missingProjectGuidance": 1
+      }
     },
     {
       "id": "decisions",
@@ -81,18 +108,19 @@
         "members": 1
       },
       "scores": {
-        "codeQuality": 5.4,
+        "codeQuality": 6.5,
         "maintainability": 10,
         "errorHandling": null,
         "performanceAsync": null,
-        "security": null,
-        "testing": null,
-        "documentation": null,
-        "dependencyManagement": null,
-        "architecture": null
+        "security": 10,
+        "testing": 0,
+        "documentation": 0,
+        "dependencyManagement": 10,
+        "architecture": 10
       },
       "findings": {
-        "codeQuality/highFunctionComplexity": 1
+        "codeQuality/highFunctionComplexity": 1,
+        "documentation/missingProjectGuidance": 1
       }
     },
     {
@@ -106,13 +134,14 @@
         "maintainability": 10,
         "errorHandling": null,
         "performanceAsync": 0,
-        "security": null,
-        "testing": null,
-        "documentation": null,
-        "dependencyManagement": null,
-        "architecture": null
+        "security": 10,
+        "testing": 0,
+        "documentation": 0,
+        "dependencyManagement": 10,
+        "architecture": 10
       },
       "findings": {
+        "documentation/missingProjectGuidance": 1,
         "performanceAsync/asyncEffectCallback": 1
       }
     },
@@ -127,13 +156,14 @@
         "maintainability": 10,
         "errorHandling": null,
         "performanceAsync": 0,
-        "security": null,
-        "testing": null,
-        "documentation": null,
-        "dependencyManagement": null,
-        "architecture": null
+        "security": 10,
+        "testing": 0,
+        "documentation": 0,
+        "dependencyManagement": 10,
+        "architecture": 10
       },
       "findings": {
+        "documentation/missingProjectGuidance": 1,
         "performanceAsync/conditionalHook": 1
       }
     },
@@ -148,13 +178,14 @@
         "maintainability": 10,
         "errorHandling": null,
         "performanceAsync": 10,
-        "security": null,
-        "testing": null,
-        "documentation": null,
-        "dependencyManagement": null,
-        "architecture": null
+        "security": 10,
+        "testing": 0,
+        "documentation": 0,
+        "dependencyManagement": 10,
+        "architecture": 10
       },
       "findings": {
+        "documentation/missingProjectGuidance": 1,
         "performanceAsync/effectWithoutDependencies": 1
       }
     },
@@ -169,13 +200,15 @@
         "maintainability": 10,
         "errorHandling": null,
         "performanceAsync": null,
-        "security": null,
-        "testing": null,
-        "documentation": null,
-        "dependencyManagement": null,
-        "architecture": null
+        "security": 10,
+        "testing": 0,
+        "documentation": 0,
+        "dependencyManagement": 10,
+        "architecture": 10
       },
-      "findings": {}
+      "findings": {
+        "documentation/missingProjectGuidance": 1
+      }
     }
   ]
 }

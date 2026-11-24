@@ -104,9 +104,9 @@ Other/private-source URLs, workspace packages, and unknown provenance are not
 queried. Repository npm configuration and authentication tokens are not read.
 This is not an authenticated private-package audit.
 
-The default limit is 100 distinct package names (direct uses first, then lexical
+From 0.7.0 the default limit is 500 distinct package names (100 in 0.6.x) (direct uses first, then lexical
 order within each group), four concurrent metadata requests,
-a 60-second scheduling budget, ten seconds per request, and 5 MiB per response.
+a 60-second scheduling budget, ten seconds per request, and 20 MiB per response (5 MiB in 0.6.x).
 Budget omissions, failed HTTP/TLS requests, redirects, invalid responses, and
 missing installed-version metadata stay unavailable. Limits never trigger package
 installation or disabled TLS verification. A request already started can finish
@@ -162,3 +162,12 @@ References: [npm lockfile structure](https://docs.npmjs.com/cli/v11/configuring-
 [node-semver](https://github.com/npm/node-semver),
 [pnpm v9 format](https://github.com/pnpm/spec/blob/master/lockfile/9.0.md),
 and [pnpm multi-document lockfiles](https://github.com/pnpm/pnpm.io/blob/main/docs/lockfile.md).
+
+## 0.7.0 scoring
+
+The nine-dimension ruleset adds scored package health when inventory and requested
+metadata are complete. See [the packaged policy](../../analyzers/javascript-typescript/SCORING.md).
+The public bulk endpoint also returns advisory rows without a redundant `name`;
+the enclosing requested package key establishes identity. A conflicting explicit
+name still invalidates the row. Query bounds and private-source exclusions remain
+visible assessment gaps, never healthy results.

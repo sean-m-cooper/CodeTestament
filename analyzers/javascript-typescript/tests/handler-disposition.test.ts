@@ -21,10 +21,10 @@ describe("failure disposition population", () => {
   it.each([[2,2,0],[100,2,9],[100,20,8],[100,50,5],[16,5,6.9],[100,0,10]])("scores %i bodies and %i issues as %s", (n,b,score) => {
     expect(errorHandlingDecision(n,b,0,0)?.finalScore).toBe(score);
   });
-  it("withholds unknown and absent populations and rejects invalid arithmetic", () => {
+  it("excludes unknown bodies and unresolved uses, withholds absent assessed populations and rejects invalid arithmetic", () => {
     expect(errorHandlingDecision(0,0,0,0)).toBeUndefined();
-    expect(errorHandlingDecision(100,0,1,0)).toBeUndefined();
-    expect(errorHandlingDecision(100,0,0,1)).toBeUndefined();
+    expect(errorHandlingDecision(100,0,1,0)?.finalScore).toBe(10);
+    expect(errorHandlingDecision(100,0,0,1)?.finalScore).toBe(10);
     for (const args of [[2,3,0,0],[2,1,2,0],[2,-1,0,0],[2,0,0,0.5]])
       expect(() => errorHandlingDecision(...args as [number,number,number,number])).toThrow();
   });
@@ -162,10 +162,10 @@ describe("bounded contextual handler classification", () => {
   it("withholds unknown bodies and callback gaps instead of rewarding them", () => {
     const e=run(`function ignore(){} Promise.reject(1).catch(ignore); Promise.reject(1).catch(missing);
       function arbitrary(){try{work()}catch{customLog()}}`);
-    expect(e.dimensions.errorHandling.status).toBe("skipped");
-    expect(e.dimensions.errorHandling.score).toBeUndefined();
+    expect(e.dimensions.errorHandling.status).toBe("scored");
+    expect(e.dimensions.errorHandling.score).toBe(0);
     expect((e.dimensions.errorHandling.dispositionEvidence as any).unknownHandlers).toBe(1);
-    expect(e.dimensions.errorHandling.findings.every(f=>f.severity==="info")).toBe(true);
+    expect(e.dimensions.errorHandling.findings.filter(f=>f.category==="unknownHandlerDisposition").every(f=>f.severity==="info")).toBe(true);
   });
   it("does not penalize result-dependent Promise fallbacks or borrow one use to classify every use", () => {
     const data=rows(`function ignore(){} Promise.reject(1).catch(ignore);

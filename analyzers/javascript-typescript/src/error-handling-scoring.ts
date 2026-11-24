@@ -4,11 +4,12 @@ import { fraction, roundScore } from "./score-arithmetic.js";
 export function errorHandlingDecision(total: number, unexplained: number, unknown: number, unresolvedUses: number) {
   if (![total, unexplained, unknown, unresolvedUses].every(value => Number.isSafeInteger(value) && value >= 0) || unexplained + unknown > total)
     throw new Error("Invalid handler population.");
-  if (!total || unknown || unresolvedUses) return undefined;
-  const populationScore = roundScore(fraction(10n * BigInt(total - unexplained), BigInt(total)));
+  const assessed = total - unknown;
+  if (!assessed) return undefined;
+  const populationScore = roundScore(fraction(10n * BigInt(assessed - unexplained), BigInt(assessed)));
   const cap = unexplained ? 9 : 10;
-  return firstMatch("javascript-typescript/errorHandling/failure-disposition-v2",
-    { countingUnit: "distinctHandlerBody", totalHandlers: total, assessedHandlers: total, unexplainedSwallowing: unexplained,
+  return firstMatch("javascript-typescript/errorHandling/assessed-dispositions-v3",
+    { countingUnit: "distinctAssessedHandlerBody", totalHandlers: total, assessedHandlers: assessed, unexplainedSwallowing: unexplained,
       unknownHandlers: unknown, unresolvedCallbackUses: unresolvedUses, populationScore, cap,
       formula: "min(10 - 10 * unexplainedSwallowing / assessedHandlers, unexplainedSwallowing > 0 ? 9 : 10)", rounding: "half-up-one-decimal" },
     [{ id: "issueCap", condition: "unexplainedSwallowing > 0 and populationScore > 9", matched: unexplained > 0 && populationScore > 9,

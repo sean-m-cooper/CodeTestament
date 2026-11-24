@@ -14,6 +14,11 @@ import { inspectErrorHandling, errorHandlingEvidence } from "./error-handling.js
 import { FailureContracts } from "./failure-contracts.js";
 import { dependencyInventory } from "./dependency-inventory.js";
 import { dependencyEvidence } from "./dependency-evidence.js";
+import { scoreArchitecture } from './architecture-scoring.js';
+import { scoreDecomposition } from './decomposition-scoring.js';
+import { inspectSecurity, scoreSecurity } from './security-scoring.js';
+import { scoreDocumentation } from './project-signals.js';
+import { scoreTesting } from './testing-scoring.js';
 
 export function analyze(options: { project?: string; tsconfig?: string; runId?: string; auditId?: string; dependencyMetadata?: boolean }, version: string): { evidence: Evidence; metrics: Metric[]; csv: string; inputs: string[] } {
   const identity = invocationIds(options.runId, options.auditId);
@@ -28,6 +33,7 @@ export function analyze(options: { project?: string; tsconfig?: string; runId?: 
   const asyncOwners: AsyncOwner[] = [];
   const decompositionModules: ReturnType<typeof decompositionModule>[] = [];
   const errorHandling: ReturnType<typeof inspectErrorHandling>[] = [];
+  const security: ReturnType<typeof inspectSecurity> = [];
   for (const pkg of discovery.packages) {
     const program = ts.createProgram(pkg.files, { ...pkg.options, noEmit: true });
     const checker = program.getTypeChecker();
@@ -52,6 +58,7 @@ export function analyze(options: { project?: string; tsconfig?: string; runId?: 
         result.findings.filter(item => item.dimension === "performanceAsync").map(item => item.finding)));
       decompositionModules.push(decompositionModule(source, file, pkg.name, result.functions));
       errorHandling.push(inspectErrorHandling(source, checker, file, pkg.name, handlerResolver, failureContracts));
+      security.push(...inspectSecurity(source, checker, file, pkg.name));
       metrics.push(...result.metrics); collected.push(...result.findings);
       functions.push(...result.functions);
     }
@@ -65,23 +72,31 @@ export function analyze(options: { project?: string; tsconfig?: string; runId?: 
   if (dimensions.performanceAsync.status === "failed") diagnostics.push({ kind: "asyncOwnership", message: dimensions.performanceAsync.basis });
   if (diagnostics.length) for (const key of ["codeQuality", "maintainability", "performanceAsync"] as const)
     dimensions[key] = { status: "failed", basis: "Incomplete source analysis; partial findings are unscored.", findings: dimensions[key].findings, scope: dimensions[key].scope };
-  dimensions.architecture = moduleGraph.finish(diagnostics.length > 0);
+  dimensions.architecture = scoreArchitecture(moduleGraph.finish(diagnostics.length > 0), decompositionModules);
   dimensions.errorHandling = errorHandlingEvidence(errorHandling, diagnostics.length > 0);
   const dependencies=dependencyInventory(discovery.packages,discovery.repositoryRoot);
   dimensions.dependencyManagement=dependencyEvidence(dependencies.inventory,undefined,options.dependencyMetadata?"public-registry":"offline");
-  dimensions.codeQuality.componentDetails = { ...(dimensions.codeQuality.componentDetails as object ?? {}),
-    decomposition: decompositionEvidence(decompositionModules, diagnostics.length > 0) };
+  dimensions.codeQuality = scoreDecomposition(dimensions.codeQuality, decompositionEvidence(decompositionModules, diagnostics.length > 0));
+  const documentation = scoreDocumentation(discovery.packages, discovery.repositoryRoot);
+  const testing = scoreTesting(discovery.packages, discovery.repositoryRoot);
+  dimensions.security = scoreSecurity(security);
+  dimensions.documentation = documentation.dimension;
+  dimensions.testing = testing.dimension;
+  if (diagnostics.length) for (const key of ['security', 'documentation', 'testing'] as const)
+    dimensions[key] = { ...dimensions[key], status: 'failed', score: undefined, scoringDecision: undefined, scoring: undefined,
+      basis: 'Incomplete production source; no score is issued.' };
   const evidence: Evidence = {
     schemaVersion: 3, generatedAtUtc: new Date().toISOString(), tool: { name: "CodeTestament.JavaScript", version, ecosystem: "javascript-typescript" },
     subject: { root: discovery.repositoryRoot, entryPoint: discovery.entryPoint, name: discovery.name, variant: "source" },
     filters: { totalUnits: discovery.packages.reduce((sum,pkg) => sum + pkg.files.length, 0) + discovery.skipped.length,
       analyzedUnits: analyzedFiles, skipped: discovery.skipped },
     population: { types: new Set(metrics.map(metric => `${metric.project}|${metric.file}|${metric.type}`)).size, members: metrics.length },
-    dimensions, analysis: { ...identity, status: diagnostics.length ? "incomplete" : "complete", ruleset: "javascript-typescript-2026-10-09-dependency-evidence",
+    dimensions, analysis: { ...identity, status: diagnostics.length ? "incomplete" : "complete", ruleset: "javascript-typescript-2026-11-24-nine-dimensions",
       calibration: "uncalibrated", configurationFingerprint: hash(JSON.stringify(canonicalConfiguration({packages:discovery.packages.map(pkg => ({ name: pkg.name,
         options: pkg.options, selection: pkg.selection })),dependencyMetadata:options.dependencyMetadata?"public-registry":"offline"}, discovery.repositoryRoot))), diagnostics, suppressions: [] }
   };
-  return { evidence, metrics, csv: toCsv(metrics), inputs: [...dependencies.inputs,...discovery.packages.flatMap(pkg => [pkg.entryPoint, ...pkg.files])] };
+  return { evidence, metrics, csv: toCsv(metrics), inputs: [...dependencies.inputs, ...documentation.inputs, ...testing.inputs,
+    ...discovery.packages.flatMap(pkg => [pkg.entryPoint, ...pkg.files])] };
 }
 function canonicalConfiguration(value: unknown, root: string): unknown {
   if (typeof value === "string") {

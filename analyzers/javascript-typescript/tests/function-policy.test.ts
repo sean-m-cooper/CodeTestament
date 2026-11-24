@@ -176,7 +176,8 @@ describe("owned function measurements", () => {
     const result = analyze({ project: path.resolve("package.json") }, "0.3.0");
     expect(() => validateEvidence(result.evidence)).not.toThrow();
     for (const dimension of ["codeQuality", "maintainability"] as const) {
-      expect(contributions(result.evidence.dimensions[dimension])).toHaveLength(result.metrics.length);
+      const d = result.evidence.dimensions[dimension];
+      expect(contributions(dimension === "codeQuality" ? (d.componentDetails as any).methodComplexity : d)).toHaveLength(result.metrics.length);
     }
   }, 15_000); // Whole-repository integration check; not a five-second performance budget.
 });

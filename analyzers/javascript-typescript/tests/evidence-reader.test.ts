@@ -34,7 +34,7 @@ it("validates native scope, explicit provenance, unsupported schemas and incompl
     const rerun = analyze({ project: path.join(root, "package.json") }, "0.2.0").evidence;
     expect(rerun.analysis.runId).not.toBe(evidence.analysis.runId);
     expect(compare(rerun, evidence).compatible).toBe(true);
-    expect(compare(rerun, evidence).unchanged).toHaveLength(1);
+    expect(compare(rerun, evidence).unchanged.filter(f => f.category === "asyncEffectCallback")).toHaveLength(1);
     expect(compare(rerun, evidence).currentRun.runId).toBe(rerun.analysis.runId);
     expect(sarif(evidence).runs[0].properties.runId).toBe(evidence.analysis.runId);
     const historical = structuredClone(evidence); delete historical.analysis.runId; delete historical.analysis.auditId;

@@ -50,10 +50,10 @@ try {
   assert.equal(evidence.tool.name, 'CodeTestament.JavaScript');
   assert.equal(evidence.tool.version, manifest.version);
   assert.equal(evidence.schemaVersion, 3); assert.ok(evidence.population.members >= 1);
-  assert.equal(evidence.analysis.ruleset, 'javascript-typescript-2026-10-09-dependency-evidence');
+  assert.equal(evidence.analysis.ruleset, 'javascript-typescript-2026-11-24-nine-dimensions');
   assert.equal(evidence.dimensions.dependencyManagement.dependencyInventory.status, 'gaps');
   assert.equal(evidence.dimensions.dependencyManagement.dependencyMetadata.status, 'notRequested');
-  assert.equal(evidence.dimensions.dependencyManagement.score, undefined);
+  assert.equal(evidence.dimensions.dependencyManagement.score, 10);
   fs.writeFileSync(path.join(fixture,'package-lock.json'), JSON.stringify({lockfileVersion:3,packages:{'':{name:'installed-smoke'}}}));
   const lockBefore=fs.readFileSync(path.join(fixture,'package-lock.json'),'utf8');
   run([cli,'--scorecard-output','package-lock.json'],fixture,2);
@@ -61,15 +61,15 @@ try {
   run([cli,'--dependency-metadata','--scorecard-output','dependencies.json'],fixture);
   const dependencies=JSON.parse(fs.readFileSync(path.join(fixture,'dependencies.json'),'utf8'));
   assert.equal(dependencies.dimensions.dependencyManagement.dependencyInventory.status,'complete');
-  assert.equal(dependencies.dimensions.dependencyManagement.score,undefined);
+  assert.equal(dependencies.dimensions.dependencyManagement.score,10);
   assert.equal(dependencies.dimensions.dependencyManagement.dependencyMetadata.status,'unavailable');
-  // No packages means no registry traffic, no advisory population, and no perfect score.
-  assert.equal(evidence.dimensions.codeQuality.scoringDecision.operation, 'deductions');
+  // No dependencies means no registry traffic; the empty resolved dependency population is explicit.
+  assert.equal(evidence.dimensions.codeQuality.scoringDecision.operation, 'mean');
   assert.equal(evidence.dimensions.codeQuality.componentDetails.methodComplexity.score, evidence.dimensions.codeQuality.score);
-  assert.equal(evidence.dimensions.codeQuality.componentDetails.decomposition.score, null);
+  assert.equal(evidence.dimensions.codeQuality.componentDetails.decomposition.score, 10);
   assert.equal(evidence.dimensions.maintainability.scoring.observations.functionContributions.length, evidence.population.members);
   assert.equal(evidence.dimensions.maintainability.scoring.observations.measurement, 'owned-function-body-v2-type-erasure');
-  for (const item of evidence.dimensions.codeQuality.scoring.observations.functionContributions) {
+  for (const item of evidence.dimensions.codeQuality.componentDetails.methodComplexity.scoring.observations.functionContributions) {
     assert.equal(item.complexityBreakdown.version, 1);
     assert.equal(item.complexityBreakdown.total, item.ownComplexity);
     assert.equal(1 + Object.values(item.complexityBreakdown.counts).reduce((sum, count) => sum + count, 0), item.ownComplexity);
@@ -120,8 +120,8 @@ try {
   fs.writeFileSync(path.join(modules, 'b.ts'), "import {a} from './a'; export const b=()=>a;");
   run([cli, '--scorecard-output', 'after.json', '--baseline', 'before.json', '--fail-on-new', 'warning', '--sarif', 'cycles.sarif'], modules);
   const cycleEvidence = JSON.parse(fs.readFileSync(path.join(modules, 'after.json'), 'utf8'));
-  assert.equal(cycleEvidence.dimensions.architecture.status, 'skipped');
-  assert.equal(cycleEvidence.dimensions.architecture.score, undefined);
+  assert.equal(cycleEvidence.dimensions.architecture.status, 'scored');
+  assert.equal(cycleEvidence.dimensions.architecture.score, 10);
   assert.equal(cycleEvidence.dimensions.architecture.dependencyGraph.cycles.length, 1);
   assert.equal(cycleEvidence.dimensions.architecture.findings[0].severity, 'info');
   fs.writeFileSync(path.join(modules, 'index.ts'), "import {a} from './a'; export {a}; export * from './b';");
@@ -160,8 +160,8 @@ try {
   fs.appendFileSync(path.join(handlers, 'code.ts'), '\nPromise.reject(3).catch(()=>{});');
   run([cli, '--scorecard-output', 'worse.json', '--baseline', 'evidence.json', '--fail-on-new', 'warning', '--max-score-drop', '0'], handlers, 1);
   assert.equal(dimensions.codeQuality.componentDetails.decomposition.population.functions, 2);
-  assert.equal(dimensions.codeQuality.componentDetails.decomposition.score, null);
-  assert.equal(dimensions.codeQuality.componentDetails.decomposition.version, 2);
+  assert.equal(dimensions.codeQuality.componentDetails.decomposition.score, 10);
+  assert.equal(dimensions.codeQuality.componentDetails.decomposition.version, 3);
   assert.equal(dimensions.codeQuality.componentDetails.decomposition.primaryMeasure, "ownedStatements");
   assert.equal(dimensions.performanceAsync.scoring.observations.eligibleOwners, 2);
   assert.equal(dimensions.performanceAsync.scoring.observations.affectedOwners, 0);

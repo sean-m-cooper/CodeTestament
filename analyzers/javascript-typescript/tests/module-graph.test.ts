@@ -30,8 +30,8 @@ describe("module dependency evidence", () => {
     expect(graph.dependencies).toHaveLength(3);
     expect(graph.nodes.map((n: any) => [n.internalValueFanOut, n.internalValueFanIn])).toEqual([[1, 1], [1, 1]]);
     expect(graph.coverage.literalResolutionPercent).toBe(100);
-    expect(evidence.dimensions.architecture.status).toBe("skipped");
-    expect(evidence.dimensions.architecture.score).toBeUndefined();
+    expect(evidence.dimensions.architecture.status).toBe("scored");
+    expect(evidence.dimensions.architecture.score).toBe(10);
     expect(evidence.dimensions.architecture.findings[0].severity).toBe("info");
     expect(() => validateEvidence(evidence)).not.toThrow();
     const baseline = structuredClone(evidence); baseline.dimensions.architecture.findings = [];
@@ -92,7 +92,7 @@ describe("module dependency evidence", () => {
     expect(evidence.dimensions.architecture.findings).toHaveLength(1);
     expect(graph.dependencyViews.implementation.internalValueEdgeCount).toBe(1);
     expect(graph.dependencyViews.reExports.internalValueEdgeCount).toBe(1);
-    expect(evidence.dimensions.architecture.score).toBeUndefined();
+    expect(evidence.dimensions.architecture.score).toBe(10);
     expect(() => validateEvidence(evidence)).not.toThrow();
   });
   it("does not invent internal re-export targets when resolution or scope is incomplete", () => {
@@ -242,7 +242,7 @@ describe("module dependency evidence", () => {
     const files = { "a.ts": "import './b';", "b.ts": "import './a';" };
     const before = run(files), after = run(files);
     expect(after.graph).toEqual(before.graph);
-    expect(compare(after.evidence, before.evidence).unchanged).toHaveLength(1);
+    expect(compare(after.evidence, before.evidence).unchanged.filter(f => f.category === "moduleDependencyCycle")).toHaveLength(1);
   });
 });
 

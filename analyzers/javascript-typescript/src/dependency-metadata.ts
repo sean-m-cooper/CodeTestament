@@ -35,7 +35,7 @@ export function publicRegistryReader(options:{timeoutMs?:number;maxBytes?:number
         headers:{accept:body?"application/json":"application/vnd.npm.install-v1+json",...(body?{"content-type":"application/json"}:{})},
         ...(body?{body:JSON.stringify(body)}:{})});
       if(!response.ok) {await response.body?.cancel();return unavailable(`Registry HTTP ${response.status}`);}
-      const limit=options.maxBytes??5*1024*1024;
+      const limit=options.maxBytes??20*1024*1024;
       if(Number(response.headers.get("content-length"))>limit) {await response.body?.cancel();return unavailable("Registry response exceeds size limit");}
       if(!response.body) return unavailable("Empty registry response");
       const reader=response.body.getReader(),chunks:Uint8Array[]=[];let size=0;
@@ -73,7 +73,9 @@ function advisoryDetails(pkg:DependencyPackage,result:MetadataResult):PackageObs
   if(!Array.isArray(entries)) return {status:"unavailable",reason:"Malformed package advisory list"};
   const advisories=new Map<string,{id:string;title:string;url:string;severity:string;range:string}>();
   for(const row of entries) {
-    if(!object(row) || row.name!==pkg.name || !["string","number"].includes(typeof row.id) || typeof row.title!=="string" ||
+    // The public bulk endpoint also returns rows identified solely by their enclosing package key.
+    // A supplied, conflicting name remains invalid; never move rows between packages.
+    if(!object(row) || row.name!==undefined && row.name!==pkg.name || !["string","number"].includes(typeof row.id) || typeof row.title!=="string" ||
       typeof row.url!=="string" || typeof row.vulnerable_versions!=="string" || !semver.validRange(row.vulnerable_versions) ||
       typeof row.severity!=="string" || !["low","moderate","high","critical","info"].includes(row.severity))
       return {status:"unavailable",reason:"Malformed advisory fields"};
@@ -86,7 +88,7 @@ function advisoryDetails(pkg:DependencyPackage,result:MetadataResult):PackageObs
 }
 
 export async function dependencyMetadata(inventory:DependencyInventory,reader:RegistryReader=publicRegistryReader(),options:{maxPackages?:number;deadlineMs?:number}={}):Promise<DependencyMetadata> {
-  const maximum=options.maxPackages??100,deadline=Date.now()+(options.deadlineMs??60000);
+  const maximum=options.maxPackages??500,deadline=Date.now()+(options.deadlineMs??60000);
   if(!Number.isSafeInteger(maximum) || maximum<1 || maximum>1000) throw new Error("Metadata package limit must be an integer from 1 to 1000");
   const direct=new Set(inventory.packages.filter(pkg=>pkg.uses.some(use=>use.direct)).map(pkg=>pkg.name));
   const names=[...new Set(inventory.packages.filter(pkg=>pkg.source==="publicRegistry").map(pkg=>pkg.name))]

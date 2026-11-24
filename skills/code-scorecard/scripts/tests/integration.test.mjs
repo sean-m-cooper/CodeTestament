@@ -9,8 +9,9 @@ import { compatibility, discover } from '../run-scorecard.mjs';
 import { installTools, readJson } from '../runtime.mjs';
 
 const runner = fileURLToPath(new URL('../run-scorecard.mjs', import.meta.url));
-const currentTool = compatibility.defaults.npm;
+const currentTool = process.env.SCORECARD_TEST_NPM_TOOL ?? compatibility.defaults.npm;
 const currentVersion = currentTool.split('@')[1];
+const nineDimensions = currentVersion === '0.7.0';
 const npmPackage = process.env.SCORECARD_NPM_PACKAGE;
 const dotnetPackage = process.env.SCORECARD_DOTNET_PACKAGE;
 
@@ -124,7 +125,7 @@ test('packaged analyzers satisfy the scorecard skill contract', { timeout: 300_0
       assert.equal(original.analysis.runId, initial.runId);
       assert.equal(original.analysis.auditId, initial.auditId);
       assert.ok(original.dimensions.performanceAsync.scope.excludes.includes('general-promise-flow'));
-      assert.equal(original.dimensions.security.status, 'skipped');
+      assert.equal(original.dimensions.security.status, nineDimensions ? 'scored' : 'skipped');
       write('ui/src/App.tsx', "import {useEffect} from 'react'; export function App(){ useEffect(async()=>{},[]); return null; }");
       const changed = invoke('--entry-point', 'ui/package.json', '--baseline', initial.artifacts.evidence, '--fail-on-new', 'warning', '--max-score-drop', '0');
       assert.equal(changed.code, 1, changed.error);
@@ -135,8 +136,20 @@ test('packaged analyzers satisfy the scorecard skill contract', { timeout: 300_0
       assert.equal(readJson(latest.artifacts.comparison).currentRun.runId, latest.runId);
       assert.equal(readJson(latest.artifacts.comparison).new.length, 1);
     });
+    await t.test('nine supported dimensions survive installed analyzer and canonical inspection', { skip: !nineDimensions }, () => {
+      write('ui/README.md', '# UI\nA small example package for installed verification.\n## Usage\nCall App.\n## Testing\nRun node --test.');
+      write('ui/test/unit.test.js', "import {test} from 'node:test'; import assert from 'node:assert'; test('works',()=>{assert.equal(1,1)});");
+      write('ui/package-lock.json', '{"lockfileVersion":3,"packages":{"":{"name":"ui"}}}');
+      write('ui/src/App.tsx', 'export async function App(){try{return await Promise.resolve(1)}catch(error){throw error}}');
+      const run = success('--entry-point', 'ui/package.json');
+      const evidence = readJson(run.artifacts.inspection).evidence;
+      assert.equal(Object.values(evidence.dimensions).filter(d => d.status === 'scored').length, 9);
+      assert.equal(evidence.dimensions.codeQuality.displayName, 'Complexity & Decomposition');
+      assert.equal(evidence.dimensions.testing.testEvidence.assertionBearingTests, 1);
+      for (const file of ['ui/README.md', 'ui/test/unit.test.js', 'ui/package-lock.json']) fs.unlinkSync(path.join(root,file));
+    });
     await t.test('a producer returning old findings at the new path is rejected despite exit zero', async () => {
-      const tooling = await installTools({ cache, 'npm-package': npmPackage }, compatibility);
+      const tooling = await installTools({ cache, 'npm-package': npmPackage, 'npm-tool': currentTool }, compatibility);
       const originalCli = fs.readFileSync(tooling.js);
       try {
         fs.writeFileSync(tooling.js, `import fs from 'node:fs'; fs.copyFileSync(${JSON.stringify(initial.artifacts.evidence)}, process.argv[process.argv.indexOf('--scorecard-output') + 1]);`);
@@ -199,8 +212,8 @@ test('packaged analyzers satisfy the scorecard skill contract', { timeout: 300_0
       const usage=dimensions.performanceAsync.scoring.observations;
       assert.equal(usage.eligibleOwners,3); assert.equal(usage.affectedOwners,0);
       const decomposition=dimensions.codeQuality.componentDetails.decomposition;
-      assert.equal(decomposition.version,2); assert.equal(decomposition.primaryMeasure,'ownedStatements');
-      assert.equal(decomposition.score,null);
+      assert.equal(decomposition.version,nineDimensions ? 3 : 2); assert.equal(decomposition.primaryMeasure,'ownedStatements');
+      assert.equal(decomposition.score,nineDimensions ? 10 : null);
       assert.equal(decomposition.modules.flatMap(m=>m.functions).find(f=>f.member==='concise').ownedStatements,1);
       const handlers=dimensions.errorHandling.handlerEvidence;
       assert.equal(handlers.totalHandlers,1); assert.equal(handlers.documentedEmptyHandlers,1);
@@ -214,7 +227,7 @@ test('packaged analyzers satisfy the scorecard skill contract', { timeout: 300_0
       assert.equal(limited.status,'skipped'); assert.equal(limited.score,undefined);
       assert.equal(limited.dispositionEvidence.unknownHandlers,1);
       assert.ok(limited.findings.every(f=>f.severity==='info'));
-      assert.equal(dimensions.architecture.score,undefined);
+      assert.equal(dimensions.architecture.score,nineDimensions ? 10 : undefined);
       assert.equal(dimensions.architecture.dependencyGraph.coverage.status,'gaps');
       assert.equal(dimensions.architecture.dependencyGraph.coverage.occurrencesByResolution.dynamic,1);
       fs.unlinkSync(path.join(root,'ui/src/handlers.tsx'));
@@ -270,7 +283,7 @@ test('packaged analyzers satisfy the scorecard skill contract', { timeout: 300_0
       assert.ok(fs.existsSync(initial.artifacts.metrics));
     });
     await t.test('canonical v2 is explicitly historical, has unknown provenance fields and cannot be gated', async () => {
-      const tooling = await installTools({ cache, 'npm-package': npmPackage }, compatibility);
+      const tooling = await installTools({ cache, 'npm-package': npmPackage, 'npm-tool': currentTool }, compatibility);
       const legacy = readJson(path.join(tooling.packageRoot, 'dist/contract-examples/javascript-typescript-evidence.json'));
       legacy.subject = { root, entryPoint: path.join(root, 'ui/package.json'), name: 'ui', variant: 'source' };
       write('archive/v2.json', JSON.stringify(legacy));

@@ -49,7 +49,8 @@
         "0.6.0-preview.3",
         "0.5.2",
         "0.6.0-preview.4",
-        "0.6.0"
+        "0.6.0",
+        "0.7.0"
       ],
       "sourceRevision": "91d6773092e2f5fc6c6e4c25de7a12d62017f7e7"
     }
@@ -265,6 +266,28 @@
           }
         },
         "requiresLocalPackage": false,
+        "expectedNameOption": true,
+        "supportsDependencyMetadata": true
+      },
+      {
+        "package": "codetestament",
+        "version": "0.7.0",
+        "commands": {
+          "javascript-typescript": "codetestament",
+          "evidence": "codetestament-evidence",
+          "python": "codetestament-python"
+        },
+        "tools": {
+          "javascript-typescript": {
+            "name": "CodeTestament.JavaScript",
+            "version": "0.7.0"
+          },
+          "python": {
+            "name": "CodeTestament.Python",
+            "version": "0.15.0"
+          }
+        },
+        "requiresLocalPackage": true,
         "expectedNameOption": true,
         "supportsDependencyMetadata": true
       }

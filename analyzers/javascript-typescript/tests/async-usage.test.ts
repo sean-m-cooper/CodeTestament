@@ -66,7 +66,7 @@ describe("bounded promise usage", () => {
     expect(dimension.findings).toHaveLength(3);
     expect(dimension.findings.every(f => f.category === "asyncForEachCallback" && f.severity === "info")).toBe(true);
     expect(dimension.scoringDecision!.findingEffects.every(f => f.effect === "excluded")).toBe(true);
-    expect(sarif(result.evidence).runs[0].results.every(f => f.level === "note")).toBe(true);
+    expect(sarif(result.evidence).runs[0].results.filter(f => f.ruleId.includes("performanceAsync")).every(f => f.level === "note")).toBe(true);
     expect(() => validateEvidence(result.evidence)).not.toThrow();
   });
 
@@ -109,7 +109,7 @@ describe("bounded promise usage", () => {
     const before = inspect("export const run = async () => { await Promise.resolve(1); };").evidence;
     const after = inspect(text).evidence;
     const moved = inspect("\n\n" + text).evidence;
-    expect(compare(moved, after).unchanged).toHaveLength(1);
+    expect(compare(moved, after).unchanged.filter(f => f.category === "asyncForEachCallback")).toHaveLength(1);
     expect(gate(compare(after, before), "warning", 0)).toBe(false);
     const older = structuredClone(after); older.analysis.ruleset = "javascript-typescript-2026-09-05";
     expect(() => compare(after, older)).toThrow("Incompatible baseline");

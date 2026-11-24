@@ -76,7 +76,7 @@ describe("decomposition evidence", () => {
     enum Kind {A,B}
     export const table=[1,2,3];`, {"index.ts":"export * from './code';"});
     const component = (result.dimensions.codeQuality.componentDetails as any).decomposition;
-    expect(component.score).toBeNull(); expect(component.status).toBe("unscored");
+    expect(component.score).toBe(10); expect(component.status).toBe("scored");
     const module = component.modules.find((item: any) => item.file === "code.ts");
     expect(module.implementedFunctions).toBe(2);
     expect(module.sumOwnedFunctionStatements).toBe(2);
@@ -95,7 +95,7 @@ describe("decomposition evidence", () => {
       export function initialized(){const value={a:1,b:2}; return value;}`);
     const profile=(result.dimensions.codeQuality.componentDetails as any).decomposition;
     const rows=profile.modules[0].functions;
-    expect(profile.version).toBe(2); expect(profile.primaryMeasure).toBe("ownedStatements");
+    expect(profile.version).toBe(3); expect(profile.primaryMeasure).toBe("ownedStatements");
     expect(rows.find((r:any)=>r.member==="short").ownedStatements).toBe(1);
     expect(rows.find((r:any)=>r.member==="explicit").ownedStatements).toBe(1);
     expect(rows.filter((r:any)=>r.member.startsWith("outer")).map((r:any)=>r.ownedStatements)).toEqual([1,1]);
@@ -139,12 +139,12 @@ describe("error-handling evidence", () => {
       Promise.reject(1).then(undefined,()=>{ // Cancellation is intentional.
       });`);
     const dimension = result.dimensions.errorHandling, data = dimension.handlerEvidence as any;
-    expect(dimension.status).toBe("skipped"); expect(dimension.score).toBeUndefined();
+    expect(dimension.status).toBe("scored"); expect(dimension.score).toBe(6.7);
     expect(data.totalHandlers).toBe(5);
     expect(data.unexplainedEmptyHandlers).toBe(2); expect(data.documentedEmptyHandlers).toBe(2);
     expect(data.handlersContainingCode).toBe(1); expect(data.unexplainedEmptyPercent).toBe(40);
     expect(dimension.findings).toHaveLength(3);
-    expect(dimension.findings.every(f => f.severity === "info")).toBe(true);
+    expect(dimension.findings.filter(f => f.category === "unknownHandlerDisposition").every(f => f.severity === "info")).toBe(true);
   });
   it("does not borrow nearby comments or confuse code with a no-op", () => {
     const result = run(`// Unrelated comment
