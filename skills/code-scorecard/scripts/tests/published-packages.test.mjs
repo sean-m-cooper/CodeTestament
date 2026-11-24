@@ -46,6 +46,9 @@ test('published defaults install into empty caches and validate all three ecosys
     assert.ifError(result.error);
     return result;
   };
+  // Isolate fixture roots from the enclosing checkout used to run this test.
+  const initialized = invoke('git', ['init', root]);
+  assert.equal(initialized.status, 0, initialized.stdout + initialized.stderr);
   const restored = invoke('dotnet', ['restore', 'app/App.csproj']);
   assert.equal(restored.status, 0, restored.stdout + restored.stderr);
   const runner = fileURLToPath(new URL('../run-scorecard.mjs', import.meta.url));
@@ -98,6 +101,8 @@ test('published defaults install into empty caches and validate all three ecosys
   const relocated = path.join(output, 'other-worktree'); fs.mkdirSync(path.join(relocated, 'ui'), { recursive: true });
   for (const file of ['package.json', 'tsconfig.json', 'work.ts'])
     fs.copyFileSync(path.join(root, 'ui', file), path.join(relocated, 'ui', file));
+  const relocatedRepository = invoke('git', ['init', relocated]);
+  assert.equal(relocatedRepository.status, 0, relocatedRepository.stdout + relocatedRepository.stderr);
   const moved = invoke(process.execPath, [runner, '--repo', relocated, '--entry-point', 'ui/package.json', '--cache', cache,
     '--baseline', baseline.artifacts.evidence, '--fail-on-new', 'warning', '--max-score-drop', '0']);
   assert.equal(moved.status, 0, moved.stderr + moved.stdout);
