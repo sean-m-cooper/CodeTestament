@@ -6,7 +6,7 @@
   "preferredEvidenceSchema": 3,
   "source": {
     "repository": "sean-m-cooper/CodeTestament",
-    "revision": "2205e9c562ef45cf893f3b455fec3c98588536f0"
+    "revision": "75b0a2a1ea3d2ba078fa5f107c17fed7cd17850b"
   },
   "analyzers": {
     "dotnet": {
@@ -42,19 +42,21 @@
     },
     "javascript-typescript": {
       "package": "codetestament",
-      "preferredVersion": "0.5.1",
+      "preferredVersion": "0.5.2",
       "testedVersions": [
         "0.5.1",
-        "0.6.0-preview.3"
+        "0.6.0-preview.3",
+        "0.5.2",
+        "0.6.0-preview.4"
       ],
-      "sourceRevision": "005192402239d1e8bfcb8fbe71305e893df0a3dd"
+      "sourceRevision": "05de4bf7a370d59c2c17323778a7c3358754b223"
     }
   },
-  "evidenceToolVersion": "0.6.0-preview.3",
+  "evidenceToolVersion": "0.6.0-preview.4",
   "defaults": {
-    "npm": "codetestament@0.6.0-preview.3",
+    "npm": "codetestament@0.6.0-preview.4",
     "dotnet": "CodeTestament.Scorecard@2.4.2",
-    "javascript-typescript": "codetestament@0.5.1"
+    "javascript-typescript": "codetestament@0.5.2"
   },
   "installations": {
     "npm": [
@@ -203,6 +205,44 @@
         },
         "requiresLocalPackage": false,
         "expectedNameOption": true
+      },
+      {
+        "package": "codetestament",
+        "version": "0.5.2",
+        "commands": {
+          "javascript-typescript": "codetestament",
+          "evidence": "codetestament-evidence"
+        },
+        "tools": {
+          "javascript-typescript": {
+            "name": "CodeTestament.JavaScript",
+            "version": "0.5.2"
+          }
+        },
+        "requiresLocalPackage": false,
+        "expectedNameOption": true
+      },
+      {
+        "package": "codetestament",
+        "version": "0.6.0-preview.4",
+        "commands": {
+          "javascript-typescript": "codetestament",
+          "evidence": "codetestament-evidence",
+          "python": "codetestament-python"
+        },
+        "tools": {
+          "javascript-typescript": {
+            "name": "CodeTestament.JavaScript",
+            "version": "0.6.0-preview.4"
+          },
+          "python": {
+            "name": "CodeTestament.Python",
+            "version": "0.15.0"
+          }
+        },
+        "requiresLocalPackage": false,
+        "expectedNameOption": true,
+        "supportsDependencyMetadata": true
       }
     ],
     "dotnet": [

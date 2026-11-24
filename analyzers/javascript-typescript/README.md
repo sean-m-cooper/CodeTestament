@@ -1,10 +1,10 @@
 # CodeTestament JavaScript and TypeScript
 
 > Stable JS/TS installs use `codetestament@0.5.1`. The examples below use
-> `codetestament@0.6.0-preview.3` for the preview features in this checkout.
+> `codetestament@0.6.0-preview.4` for the preview features in this checkout.
 > See the [migration guide](../../docs/codetestament-migration.md).
 
-Deterministic source analysis for JavaScript, TypeScript, JSX and TSX, with Python support in preview 0.6.0-preview.3. The package implements source metrics and React hook/effect checks and emits schema-v3 evidence, including executed scoring decisions. Scores are **uncalibrated across ecosystems**; compare them only with compatible runs of this analyzer.
+Deterministic source analysis for JavaScript, TypeScript, JSX and TSX, with Python support in preview 0.6.0-preview.4. The package implements source metrics and React hook/effect checks and emits schema-v3 evidence, including executed scoring decisions. Scores are **uncalibrated across ecosystems**; compare them only with compatible runs of this analyzer.
 
 Each scored dimension includes `scoringDecision`: policy inputs, executed steps, rounding and finding attribution. These are aggregate policy decisions, not independent finding deductions. See [the decision contract](../../shared/scorecard-schema/scoring-decisions.md).
 
@@ -15,16 +15,16 @@ contextual Error Handling scoring. Adopting it requires a fresh baseline. See th
 The earlier 0.4.0 ruleset `javascript-typescript-2026-10-04-local-handlers` replaces the published 0.3.0 maximum-CC/median-MI ladders with owned-function population scores and extends React-only checks with bounded promise-usage analysis. It also corrects erased TypeScript syntax in owned-body measurements, scores async usage by affected eligible owners, and adds unscored module dependency, decomposition, and error-handler evidence. Generate new baselines when upgrading from 0.3.0. See the [0.4.0 release and migration notes](https://github.com/sean-m-cooper/CodeTestament/blob/master/docs/releases/javascript-typescript-0.4.0.md).
 
 ```sh
-npm exec --yes --package=codetestament@0.6.0-preview.3 -- codetestament --project package.json
-npm exec --yes --package=codetestament@0.6.0-preview.3 -- codetestament --project package.json --tsconfig tsconfig.json
-npm exec --yes --package=codetestament@0.6.0-preview.3 -- codetestament --output results/metrics.csv --scorecard-output results/evidence.json
+npm exec --yes --package=codetestament@0.6.0-preview.4 -- codetestament --project package.json
+npm exec --yes --package=codetestament@0.6.0-preview.4 -- codetestament --project package.json --tsconfig tsconfig.json
+npm exec --yes --package=codetestament@0.6.0-preview.4 -- codetestament --output results/metrics.csv --scorecard-output results/evidence.json
 ```
 
 Default output paths are `.scorecard/javascript-typescript/metrics.csv` and `.scorecard/javascript-typescript/evidence.json`, relative to the current directory. Node 20 or later is required. The TypeScript compiler API is a pinned runtime dependency, so an installed package can analyze source without a development checkout.
 
 ## Implemented scope
 
-The local migration preview 0.6.0-preview.3 retains unscored npm/pnpm dependency inventory and optional
+The local migration preview 0.6.0-preview.4 retains unscored npm/pnpm dependency inventory and optional
 registry observations under ruleset `javascript-typescript-2026-10-09-dependency-evidence`.
 Changing tool identity requires fresh baselines. Legacy codemetrics-ai 0.5.0 does not include this extension. CodeTestament has no published npm channels yet.
 
@@ -130,8 +130,15 @@ CSV preserves the shared header. Namespace is the repository-relative module pat
 
 ## Baselines and SARIF
 
+Versions 0.5.2 and 0.6.0-preview.4 normalize compiler paths equal to the repository root as well
+as paths beneath it, so equivalent settings such as `baseUrl: "."` and
+`rootDir: "."` compare across worktrees. Actual configuration differences still
+reject comparisons. Baselines affected by the older path-dependent hash must be
+regenerated from their original source revision with the corrected analyzer;
+see [portable configuration and migration](../../docs/evidence-workflows.md#portable-jsts-configuration).
+
 ```sh
-npm exec --yes --package=codetestament@0.6.0-preview.3 -- codetestament --baseline quality-baselines/javascript-typescript.json \
+npm exec --yes --package=codetestament@0.6.0-preview.4 -- codetestament --baseline quality-baselines/javascript-typescript.json \
   --comparison-output results/comparison.json --fail-on-new warning \
   --max-score-drop 0 --sarif results/analysis.sarif
 
@@ -205,7 +212,7 @@ an assessable population. Decomposition remains unscored.
 
 ## Experimental Python command in development builds
 
-Local development archives bundle `codetestament-python` and its Python 3.12 AST adapter, version `0.15.0`. It parses source without importing the target and produces evidence v3 with a production Method Complexity score, owned statements, block nesting, duplication, optional coverage/CRAP review evidence, and unscored exception-handler observations at `dimensions.errorHandling.review`, plus bounded lexical context and conservative patterns at `dimensions.errorHandling.contextReview`, with owned raise/cause syntax at `dimensions.errorHandling.transferReview` and owned calls/returns plus unresolved-suite inventory at `dimensions.errorHandling.operationReview`, and async-owned call evidence at `dimensions.performanceAsync.review`. `--coverage-json` imports observations; `--collection-manifest` checks their source binding. Adapter 0.15.0 also scores Async/Blocking Usage from production-owner contributions at `performanceAsync.asyncScoring`, with bounded paths at `performanceAsync.helperReview`. The other seven Python dimensions remain unavailable; decomposition, duplication, coverage/CRAP, and handler observations remain unscored. Install `codetestament@0.6.0-preview.3` explicitly to use these commands; legacy codemetrics-ai 0.5.0 does not include them. For example: `npm exec --yes --package=codetestament@0.6.0-preview.3 -- codetestament-python --project ./pyproject.toml --scorecard-output ./python-evidence.json`. The installed package includes its Python guide at `dist/python/README.md` and scoring policy at `dist/python/ASYNC_SCORING.md`. Ordinary analysis/import needs only Node.js 20+ and Python 3.12. The separate `codetestament-python-collect` command explicitly executes tests and requires a caller-supplied environment containing coverage.py and the project's test dependencies.
+Local development archives bundle `codetestament-python` and its Python 3.12 AST adapter, version `0.15.0`. It parses source without importing the target and produces evidence v3 with a production Method Complexity score, owned statements, block nesting, duplication, optional coverage/CRAP review evidence, and unscored exception-handler observations at `dimensions.errorHandling.review`, plus bounded lexical context and conservative patterns at `dimensions.errorHandling.contextReview`, with owned raise/cause syntax at `dimensions.errorHandling.transferReview` and owned calls/returns plus unresolved-suite inventory at `dimensions.errorHandling.operationReview`, and async-owned call evidence at `dimensions.performanceAsync.review`. `--coverage-json` imports observations; `--collection-manifest` checks their source binding. Adapter 0.15.0 also scores Async/Blocking Usage from production-owner contributions at `performanceAsync.asyncScoring`, with bounded paths at `performanceAsync.helperReview`. The other seven Python dimensions remain unavailable; decomposition, duplication, coverage/CRAP, and handler observations remain unscored. Install `codetestament@0.6.0-preview.4` explicitly to use these commands; legacy codemetrics-ai 0.5.0 does not include them. For example: `npm exec --yes --package=codetestament@0.6.0-preview.4 -- codetestament-python --project ./pyproject.toml --scorecard-output ./python-evidence.json`. The installed package includes its Python guide at `dist/python/README.md` and scoring policy at `dist/python/ASYNC_SCORING.md`. Ordinary analysis/import needs only Node.js 20+ and Python 3.12. The separate `codetestament-python-collect` command explicitly executes tests and requires a caller-supplied environment containing coverage.py and the project's test dependencies.
 
 Python adapter 0.13.0 also embeds unscored async call context at `dimensions.performanceAsync.contextReview`, including unresolved reason/shape inventories and bounded local callback/stored-wrapper links. The package ships `dist/python/ASYNC_CONTEXT.md`; historical 0.12.0 reports remain valid without this extension.
 

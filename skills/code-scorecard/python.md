@@ -6,7 +6,7 @@ Python support measures selected implementation bodies using Python 3.12's nativ
 
 Follow [package selection and migration](bootstrap.md#package-selection-and-codetestament-migration) for exact pins, optional local archives, and historical imports. Published CodeTestament defaults retain Python adapter `0.15.0` and do not enable Error Handling scoring.
 
-The helper installs the exact `codetestament@0.6.0-preview.3` npm package from the compatibility manifest into an isolated cache. The Python adapter identifies itself as `0.15.0`; its source-facts producer remains `0.4.0-experimental`. Node.js 20+ and Python 3.12 are required. No separate PyPI package or target dependency installation is needed. Python scoring is a preview: Method Complexity and Async/Blocking Usage only; Error Handling remains unscored.
+The helper installs the exact `codetestament@0.6.0-preview.4` npm package from the compatibility manifest into an isolated cache. The Python adapter identifies itself as `0.15.0`; its source-facts producer remains `0.4.0-experimental`. Node.js 20+ and Python 3.12 are required. No separate PyPI package or target dependency installation is needed. Python scoring is a preview: Method Complexity and Async/Blocking Usage only; Error Handling remains unscored.
 
 ```sh
 node <skill>/scripts/run-scorecard.mjs --repo <repo> --ecosystem python

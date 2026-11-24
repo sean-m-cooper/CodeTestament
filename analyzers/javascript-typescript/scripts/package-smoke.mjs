@@ -25,6 +25,7 @@ try {
     assert.ok(fs.existsSync(path.join(install, 'node_modules/.bin', name + (process.platform === 'win32' ? '.cmd' : ''))));
   const fixture = path.join(temporary, 'fixture'); fs.mkdirSync(fixture);
   fs.writeFileSync(path.join(fixture, 'package.json'), '{"name":"installed-smoke"}');
+  fs.writeFileSync(path.join(fixture, 'tsconfig.json'), JSON.stringify({ compilerOptions: { baseUrl: '.', rootDir: '.' } }));
   fs.writeFileSync(path.join(fixture, 'App.tsx'), "import {useEffect} from 'react'; export function App(){useEffect(async()=>{},[]); return <div/>;}");
   const cli = path.join(install, 'node_modules/codetestament/dist/cli.js');
   for (const name of ['arithmetic', 'contract', 'population']) {
@@ -38,6 +39,14 @@ try {
   assert.ok(fs.readFileSync(cli, 'utf8').startsWith('#!/usr/bin/env node'));
   run([cli, '--scorecard-output', 'before.json', '--sarif', 'before.sarif'], fixture);
   const evidence = JSON.parse(fs.readFileSync(path.join(fixture, 'before.json'), 'utf8'));
+  const relocated = path.join(temporary, 'other-worktree'); fs.mkdirSync(relocated);
+  for (const file of ['package.json', 'tsconfig.json', 'App.tsx']) fs.copyFileSync(path.join(fixture, file), path.join(relocated, file));
+  run([cli, '--scorecard-output', 'relocated.json', '--baseline', path.join(fixture, 'before.json'),
+    '--comparison-output', 'comparison.json', '--fail-on-new', 'warning', '--max-score-drop', '0'], relocated);
+  const moved = JSON.parse(fs.readFileSync(path.join(relocated, 'relocated.json'), 'utf8'));
+  assert.notEqual(moved.subject.root, evidence.subject.root);
+  assert.equal(moved.analysis.configurationFingerprint, evidence.analysis.configurationFingerprint);
+  assert.equal(JSON.parse(fs.readFileSync(path.join(relocated, 'comparison.json'), 'utf8')).compatible, true);
   assert.equal(evidence.tool.name, 'CodeTestament.JavaScript');
   assert.equal(evidence.tool.version, manifest.version);
   assert.equal(evidence.schemaVersion, 3); assert.ok(evidence.population.members >= 1);

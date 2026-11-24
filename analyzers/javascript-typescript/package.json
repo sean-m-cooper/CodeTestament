@@ -1,6 +1,6 @@
 {
   "name": "codetestament",
-  "version": "0.6.0-preview.3",
+  "version": "0.6.0-preview.4",
   "description": "Deterministic code metrics for JavaScript and TypeScript, with Python scoring preview",
   "license": "MIT",
   "type": "module",
