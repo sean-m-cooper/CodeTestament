@@ -63,7 +63,7 @@ test('honors dotnet manifest roots and nearest npm scopes, with case-insensitive
   assert.equal(selectInstallation(root, project, 'dotnet', {}, compatibility).toolName, 'CodeTestament.Scorecard');
   assert.equal(selectInstallation(root, project, 'dotnet', {}, compatibility).packageVersion, '2.4.0');
   fs.writeFileSync(path.join(child, '.config/dotnet-tools.json'), JSON.stringify({ isRoot: true, tools: {} }));
-  assert.equal(selectInstallation(root, project, 'dotnet', {}, compatibility).packageVersion, '2.4.2');
+  assert.equal(selectInstallation(root, project, 'dotnet', {}, compatibility).packageVersion, '2.4.3');
   fs.writeFileSync(path.join(child, '.config/dotnet-tools.json'), JSON.stringify({ tools: {
     'codemetrics.ai': { version: '2.3.1' }, 'CodeTestament.Scorecard': { version: '2.4.0' } } }));
   assert.throws(() => selectInstallation(root, project, 'dotnet', {}, compatibility), /Ambiguous/);

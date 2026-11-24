@@ -1,9 +1,9 @@
 # Moving to CodeTestament
 
 CodeMetrics.AI is becoming **CodeTestament**, with **CodeTestament Scorecard** as
-the assessment product. NuGet `CodeTestament.Scorecard@2.4.2`, stable npm `codetestament@0.5.2`, and preview npm
+the assessment product. NuGet `CodeTestament.Scorecard@2.4.3`, stable npm `codetestament@0.5.2`, and preview npm
 `codetestament@0.6.0-preview.4` are published. GitHub is now
-`sean-m-cooper/CodeTestament`, and plugin 0.2.4 selects these exact defaults.
+`sean-m-cooper/CodeTestament`, and plugin 0.2.5 selects these exact defaults.
 Supported legacy repository pins remain honored.
 
 The [local validation checkpoint](codetestament-migration-validation.md) records
@@ -13,7 +13,7 @@ executed tests, paired artifact hashes and remaining release checks.
 
 | Distribution | Version | Commands |
 | --- | --- | --- |
-| NuGet `CodeTestament.Scorecard` | `2.4.2` | `codetestament-dotnet` |
+| NuGet `CodeTestament.Scorecard` | `2.4.3` | `codetestament-dotnet` |
 | npm `codetestament` (stable JS/TS) | `0.5.2` | `codetestament`, `codetestament-evidence` |
 | npm `codetestament` (preview) | `0.6.0-preview.4` | `codetestament`, `codetestament-evidence`, `codetestament-python`, `codetestament-python-collect` |
 
@@ -29,7 +29,7 @@ Install the preview explicitly for Python or the JS/TS dependency metadata probe
 ## Install published packages
 
 ```sh
-dotnet tool install --global CodeTestament.Scorecard --version 2.4.2
+dotnet tool install --global CodeTestament.Scorecard --version 2.4.3
 npm exec --yes --package=codetestament@0.5.2 -- codetestament --help
 npm exec --yes --package=codetestament@0.6.0-preview.4 -- codetestament-python --help
 ```
@@ -50,7 +50,7 @@ npm ci
 npm pack --pack-destination ../../TestResults/brand-migration/current
 Pop-Location
 
-dotnet tool install CodeTestament.Scorecard --version 2.4.2 --tool-path ./TestResults/codetestament-tools --add-source ./TestResults/brand-migration/current
+dotnet tool install CodeTestament.Scorecard --version 2.4.3 --tool-path ./TestResults/codetestament-tools --add-source ./TestResults/brand-migration/current
 ./TestResults/codetestament-tools/codetestament-dotnet --help
 
 npm install --prefix ./TestResults/codetestament-npm --ignore-scripts --no-audit --no-fund ./TestResults/brand-migration/current/codetestament-0.6.0-preview.4.tgz
